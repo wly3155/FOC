@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "FOC",
+			"path": "."
+		},
+		{
+			"name": "STM32",
+			"path": "../../../STM32"
+		},
+		{
+			"name": "FreeRTOS",
+			"path": "../../../FreeRTOS"
+		}
+	],
+	"settings": {}
+}
