@@ -7,5 +7,4 @@
 void main(void)
 {
     printf("hello_world\n");
-    sdfsdgfg
 }

@@ -25,8 +25,8 @@ OBJECTS += $(addprefix $(OUTPUT_DIR)/,$(notdir $(ASM_FILES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_FILES)))
 
 $(OUTPUT_DIR)/%.o: %.c Makefile | $(OUTPUT_DIR)
-	$(_CROSS_COMPILER_GCC_) -c $(CFLAGS) $(C_INCLUDES) \
-		-Wa,-a,-ad,-alms=$(OUTPUT_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+	$(_CROSS_COMPILER_GCC_) -c $(C_FLAGS) $(C_INCLUDES) \
+	-Wa,-a,-ad,-alms=$(OUTPUT_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(OUTPUT_DIR)/%.o: %.s Makefile | $(OUTPUT_DIR)
 	$(_CROSS_COMPILER_GCC_) -x assembler-with-cpp -c $(CFLAGS) $(C_INCLUDES) $< -o $@
