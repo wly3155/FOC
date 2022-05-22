@@ -60,4 +60,12 @@ erase_and_download:
 download:
 	$(FLASH_TOOL) --reset write $(OUTPUT_DIR)/$(TARGET).bin $(FLASH_ADDR)
 
+gdb_server_start:
+	$(GDB_SERVER)
+
+gdb:
+	$(_CROSS_COMPILER_GDB_) $(OUTPUT_DIR)/$(TARGET).elf
+#From GDB, connect to the server using:
+#(gdb) target extended localhost:4242
+
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)

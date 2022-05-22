@@ -7,7 +7,7 @@
 extern "c" {
 #endif
 
-//#define PRINTF_SUPPORT
+#define PRINTF_SUPPORT
 
 enum {
 	LOG_DEBUG,

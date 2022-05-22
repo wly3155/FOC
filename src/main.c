@@ -110,6 +110,7 @@
 
 #include "main.h"
 #include "led.h"
+#include "bldc.h"
 
 int main(void)
 {
@@ -117,7 +118,7 @@ int main(void)
 	prvSetupHardware();
 
 	led_init();
-
+	bldc_init();
 	/* Start the scheduler. */
 	vTaskStartScheduler();
 
