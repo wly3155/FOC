@@ -1,4 +1,6 @@
 # gitignore file
 *.o
+*.log
+*.code-workspace
 FOC_OUT/
 

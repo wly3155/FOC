@@ -48,15 +48,24 @@ $(OUTPUT_DIR):
 clean:
 	-rm -fR .dep $(OUTPUT_DIR)
 
-flash:
-#for STM32 Usage Only
-	$(FLASH_TOOL) write $(OUTPUT_DIR)/$(TARGET).bin $(FLASH_ADDR)
+#below for STM32 Usage Download Only
+force_download:
+	$(FLASH_TOOL) --debug --connect-under-reset erase $(FLASH_ADDR) $(FLASH_SIZE)
+	$(FLASH_TOOL) --debug --connect-under-reset write $(OUTPUT_DIR)/$(TARGET).bin $(FLASH_ADDR)
 
-flash_and_run:
-#for STM32 Usage Only
+erase_and_download:
+	$(FLASH_TOOL) --debug erase $(FLASH_ADDR) $(FLASH_SIZE)
 	$(FLASH_TOOL) --reset write $(OUTPUT_DIR)/$(TARGET).bin $(FLASH_ADDR)
 
-erase:
-	$(FLASH_TOOL) erase
+download:
+	$(FLASH_TOOL) --reset write $(OUTPUT_DIR)/$(TARGET).bin $(FLASH_ADDR)
+
+
+#below for STM32 Debug Only
+openocd_start:
+	$(OPENOCD_TOOL) -f $(OPENOCD_INTERFACE_CFG) -f $(OPENOCD_TARTGET_CFG) &
+
+gdb: #target remote :3333 for connect
+	$(_CROSS_COMPILER_GDB_) $(OUTPUT_DIR)/$(TARGET).elf
 
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)

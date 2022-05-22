@@ -4,7 +4,7 @@
 #include "stm32f4xx_gpio.h"
 #endif
 
-void main(void)
+int test_task(void)
 {
-    printf("hello_world\n");
+    return 0;
 }

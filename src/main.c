@@ -108,17 +108,8 @@
 #include "timers.h"
 #include "semphr.h"
 
-#include "foc_board.h"
+#include "main.h"
 #include "led.h"
-
-static void prvSetupHardware( void )
-{
-	/* Setup STM32 system (clock, PLL and Flash configuration) */
-	SystemInit();
-
-	/* Ensure all priority bits are assigned as preemption priority bits. */
-	NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
-}
 
 int main(void)
 {
