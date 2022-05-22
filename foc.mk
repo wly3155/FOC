@@ -36,7 +36,7 @@ LD_LIBS +=
 FLASH_TOOL_DIR = /usr/local/bin
 FLASH_TOOL = $(FLASH_TOOL_DIR)/st-flash
 FLASH_ADDR = 0x08000000
-FLASH_SIZE = 0x000fffff
+FLASH_SIZE = 0x00100000
 
 OPENOCD_TOOL_DIR = /usr/local/bin
 OPENOCD_TOOL = $(OPENOCD_TOOL_DIR)/openocd
@@ -73,7 +73,7 @@ endif
 C_FILES += $(FOC_DIR)/src/main.c
 C_FILES += $(FOC_DIR)/src/irq.c
 C_FILES += $(FOC_DIR)/src/log.c
-C_FLAGS += --specs=nano.specs --specs=nosys.specs
+#C_FLAGS += --specs=nano.specs --specs=nosys.specs
 C_FILES += $(FOC_DIR)/src/led.c
 
 C_INCLUDES += -I$(FOC_DIR)/include/bldc
