@@ -1,6 +1,8 @@
 #ifndef __FOC_BOARD_H__
 #define __FOC_BOARD_H__
 
+#include "stm32f4xx.h"
+
 #ifdef __cplusplus
 extern "c" {
 #endif
@@ -27,6 +29,15 @@ enum chip_pin {
 
 #define LED_G_PIN				(CHIP_PIN_33)
 #define LED_R_PIN				(CHIP_PIN_40)
+#define USART_TX_PIN			(CHIP_PIN_58)
+#define USART_RX_PIN			(CHIP_PIN_59)
+
+#define ARRAY_SIZE(x)			(sizeof(x)/sizeof(x[0]))
+
+enum {
+	RCC_APB1Periph,
+	RCC_APB2Periph,
+};
 
 void prvSetupHardware(void);
 

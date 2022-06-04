@@ -3,7 +3,10 @@ include foc.config
 PROJECT=FOC
 FOC_DIR=.
 
+CFG_USART_SUPPORT = yes
+
 ifeq ($(CFG_STM32F405RGT6_SUPPORT),yes)
+C_FLAGS += -DUSE_FULL_ASSERT
 C_FLAGS += -DSTM32F40_41xxx
 C_FLAGS += -DHSE_VALUE=8000000
 C_FLAGS += -DPLL_M=8
@@ -68,16 +71,24 @@ C_FLAGS += -DCFG_ST_BOARD_SUPPORT
 C_INCLUDES += -I$(FOC_DIR)/include
 C_FILES += $(FOC_DIR)/src/st/st_board.c
 C_FILES += $(FOC_DIR)/src/st/st_gpio.c
-C_FILES += $(FOC_DIR)/src/st/st_usart.c
 C_FILES += $(FOC_DIR)/src/st/st_pwm.c
 C_FILES += $(FOC_DIR)/src/st/st_timer.c
+
+ifeq ($(CFG_USART_SUPPORT),yes)
+C_FLAGS += -DCFG_USART_SUPPORT
+C_FILES += $(FOC_DIR)/src/st/st_usart.c
+endif
 endif
 
 C_FILES += $(FOC_DIR)/src/main.c
 C_FILES += $(FOC_DIR)/src/irq.c
-C_FILES += $(FOC_DIR)/src/log.c
-C_FLAGS += --specs=nano.specs --specs=nosys.specs
+C_FILES += $(FOC_DIR)/src/time.c
 C_FILES += $(FOC_DIR)/src/led.c
+
+C_FILES += $(FOC_DIR)/src/log.c
+LD_FLAGS += -Wl,--wrap,printf
+
+LD_FLAGS += -Wl,--wrap=test
 
 C_INCLUDES += -I$(FOC_DIR)/include/bldc
 C_FILES += $(FOC_DIR)/src/bldc/bldc_pwm.c

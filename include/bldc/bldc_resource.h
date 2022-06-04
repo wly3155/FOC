@@ -40,9 +40,9 @@ extern "c" {
 #endif
 
 enum {
-	BLDC_AXIS_0,
-	BLDC_AXIS_1,
-	BLDC_AXES,
+	BLDC_ID_0,
+	BLDC_ID_1,
+	MAX_DEV_NUM,
 };
 
 #ifdef __cplusplus

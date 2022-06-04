@@ -112,15 +112,17 @@ int pwm_set_duty(enum chip_pin pin, float duty_percent, bool dual_polarity)
 	if (channel < 0)
 		return channel;
 
-	memset(&TIM_OCInitStructure, 0x00, sizeof(TIM_OCInitStructure));
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIM_OCInitStructure.TIM_Pulse = (uint32_t)(duty_percent * timer->ARR);
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Reset;
+
 	if (is_advance_timer(timer)) {
 		if (dual_polarity) {
-			TIM_OCInitStructure.TIM_OutputNState = TIM_OutputState_Enable;
-			TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCPolarity_Low;
+			TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
+			TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_Low;
+			TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
 		}
 	}
 
@@ -154,6 +156,7 @@ int pwm_enabledisable(enum chip_pin pin, bool en)
 	timer = chip_pin_to_pwm_timer(pin);
 	if (!timer)
 		return -EINVAL;
+
 	TIM_ARRPreloadConfig(timer, en);
 	TIM_Cmd(timer, en);
 	return 0;
@@ -176,7 +179,7 @@ int pwm_init(enum chip_pin pin)
 	if (ret < 0)
 		return ret;
 
-	return timer_clock_enable(af_mode, true);
+	return 0;//timer_clock_enable(af_mode, true);
 }
 
 int pwm_deinit(enum chip_pin pin)
@@ -187,5 +190,5 @@ int pwm_deinit(enum chip_pin pin)
 	if (af_mode < 0)
 		return af_mode;
 
-	return timer_clock_enable(af_mode, false);
+	return 0;//timer_clock_enable(af_mode, false);
 }

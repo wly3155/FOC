@@ -29,6 +29,8 @@ enum {
 #define loge(format, ...)		{}
 #endif
 
+int log_init();
+
 #ifdef __cplusplus
 }
 #endif

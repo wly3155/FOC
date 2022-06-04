@@ -29,16 +29,16 @@ OBJECTS += $(sort $(ASM_FILES:%.s=$(OUTPUT_DIR)/%.o))
 $(OUTPUT_DIR)/%.o : %.c Makefile | $(OUTPUT_DIR)
 	@echo 'compile $< to $@'
 	@mkdir -p $(dir $@)
-	$(_CROSS_COMPILER_GCC_) -c $(C_FLAGS) $(C_INCLUDES) \
+	$(_CROSS_COMPILER_GCC_) -c $(C_FLAGS) $(LD_FLAGS) $(C_INCLUDES) \
 	-Wa,-a,-ad,-alms=$(OUTPUT_DIR)/$(<:.c=.lst) $< -o $@
 
 $(OUTPUT_DIR)/%.o : %.s Makefile | $(OUTPUT_DIR)
 	@echo 'compile $< to $@'
 	@mkdir -p $(dir $@)
-	$(_CROSS_COMPILER_GCC_) -x assembler-with-cpp -c $(C_FLAGS) $(C_INCLUDES) $< -o $@
+	$(_CROSS_COMPILER_GCC_) -x assembler-with-cpp -c $(C_FLAGS) $(LD_FLAGS) $(C_INCLUDES) $< -o $@
 
 $(OUTPUT_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
-	$(_CROSS_COMPILER_GCC_) $(OBJECTS) $(C_FLAGS) $(LD_LIBS) -T$(LD_SCRIPT) -o $@
+	$(_CROSS_COMPILER_GCC_) $(OBJECTS) $(C_FLAGS) $(LD_FLAGS) $(LD_LIBS) -Wl,-Map=$(OUTPUT_DIR)/$(TARGET).map -T$(LD_SCRIPT) -o $@
 	$(_CROSS_COMPILER_SIZE_) $@
 
 $(OUTPUT_DIR):

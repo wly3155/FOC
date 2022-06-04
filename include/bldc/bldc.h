@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "bldc_resource.h"
 
 #ifdef __cplusplus
 extern "c" {
@@ -24,6 +25,13 @@ enum {
 	EVENT_PRIVATE_END = 160,
 };
 
+enum {
+	STATUS_UNINIT = 0,
+	STATUS_IDLE,
+	STATUS_RUNNING,
+	STATUS_ERROR,
+};
+
 struct bldc_header {
 	uint8_t id;
 	uint8_t padding;
@@ -31,7 +39,7 @@ struct bldc_header {
 };
 
 struct bldc_control {
-	uint32_t duty;
+	float duty;
 	uint32_t freq;
 };
 
@@ -53,12 +61,12 @@ struct bldc_event {
 struct bldc_device {
 	uint8_t status;
 	uint8_t to_step;
-	uint32_t duty;
+	float duty;
 	uint32_t freq;
 };
 
 void bldc_init(void);
-int bldc_enable(uint8_t id, uint32_t duty, uint32_t freq);
+int bldc_enable(uint8_t id, float duty);
 int bldc_disble(uint8_t id);
 
 #ifdef __cplusplus

@@ -109,6 +109,7 @@
 #include "semphr.h"
 
 #include "main.h"
+#include "log.h"
 #include "led.h"
 #include "bldc.h"
 
@@ -116,9 +117,11 @@ int main(void)
 {
 	/* Configure the hardware ready to run the test. */
 	prvSetupHardware();
-
+	log_init();
+	logi("********foc start*********\n");
 	led_init();
 	bldc_init();
+
 	/* Start the scheduler. */
 	vTaskStartScheduler();
 
@@ -176,4 +179,9 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 	function is called if a stack overflow is detected. */
 	taskDISABLE_INTERRUPTS();
 	for( ;; );
+}
+
+void assert_failed(uint8_t* file, uint32_t line)
+{
+	configASSERT(0);
 }

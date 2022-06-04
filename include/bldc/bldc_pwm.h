@@ -12,7 +12,9 @@ enum {
 	PHASE_MAX,
 };
 
-struct bldc_pwm_pin {
+struct bldc_pwm  {
+	struct timer_device *base_timer;
+	uint8_t base_timer_id;
 	uint16_t high[PHASE_MAX];
 	uint16_t low[PHASE_MAX];
 };

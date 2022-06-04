@@ -1,9 +1,14 @@
 #ifndef __IRQ_H__
 #define __IRQ_H__
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
  extern "C" {
 #endif 
+
+bool is_in_isr(void);
+void irq_register(uint8_t irq_num, int (*irq_handler)(void *private_data), void *private_data);
 
 #ifndef __weak
 #define __weak __attribute__((weak))
