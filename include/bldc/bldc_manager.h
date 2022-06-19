@@ -9,27 +9,39 @@
 extern "c" {
 #endif
 
-enum {
+enum BLDC_MODE {
 	BLDC_PWM_ON_MODE,
 	BLDC_MAX_SUPPORT_MODE,
 };
 
-enum {
+enum BLDC_EVENT {
 	EVENT_PUBLIC_START = 0,
-	EVENT_DISABLE = EVENT_PUBLIC_START,
+	EVENT_UPDATE = 	EVENT_PUBLIC_START,
+	EVENT_DISABLE,
 	EVENT_ENABLE,
 	EVENT_CALIBRATE,
 	EVENT_CONFIG,
 	EVENT_PUBLIC_END,
+
 	EVENT_PRIVATE_START = 128,
 	EVENT_PRIVATE_END = 160,
 };
 
-enum {
+enum BLDC_STATUS {
 	STATUS_UNINIT = 0,
 	STATUS_IDLE,
 	STATUS_RUNNING,
 	STATUS_ERROR,
+};
+
+enum BLDC_DIR {
+	DIR_CW,
+	DIR_CCW,
+};
+
+enum BLDC_CFG_CMD {
+	DIRECTION,
+	MAX_CFG_CMD,
 };
 
 struct bldc_header {
@@ -39,8 +51,8 @@ struct bldc_header {
 };
 
 struct bldc_control {
+	uint8_t dir;
 	float duty;
-	uint32_t freq;
 };
 
 struct bldc_config {
@@ -58,16 +70,18 @@ struct bldc_event {
 	};
 };
 
-struct bldc_device {
-	uint8_t status;
-	uint8_t to_step;
-	float duty;
-	uint32_t freq;
+struct bldc_device_interface {
+	int (*update_step)(struct bldc_event *);
+	int (*enable)(struct bldc_event *);
+	int (*disable)(struct bldc_event *);
+	int (*config)(struct bldc_event *);
 };
 
-void bldc_init(void);
+int bldc_update(uint8_t id);
 int bldc_enable(uint8_t id, float duty);
 int bldc_disble(uint8_t id);
+void bldc_manager_init(void);
+int bldc_manager_device_register(struct bldc_device_interface *interface);
 
 #ifdef __cplusplus
 }

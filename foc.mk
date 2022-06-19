@@ -3,8 +3,6 @@ include foc.config
 PROJECT=FOC
 FOC_DIR=.
 
-CFG_USART_SUPPORT = yes
-
 ifeq ($(CFG_STM32F405RGT6_SUPPORT),yes)
 C_FLAGS += -DUSE_FULL_ASSERT
 C_FLAGS += -DSTM32F40_41xxx
@@ -71,8 +69,9 @@ C_FLAGS += -DCFG_ST_BOARD_SUPPORT
 C_INCLUDES += -I$(FOC_DIR)/include
 C_FILES += $(FOC_DIR)/src/st/st_board.c
 C_FILES += $(FOC_DIR)/src/st/st_gpio.c
-C_FILES += $(FOC_DIR)/src/st/st_pwm.c
 C_FILES += $(FOC_DIR)/src/st/st_timer.c
+C_FILES += $(FOC_DIR)/src/st/st_pwm.c
+C_FILES += $(FOC_DIR)/src/st/st_input_capture.c
 
 ifeq ($(CFG_USART_SUPPORT),yes)
 C_FLAGS += -DCFG_USART_SUPPORT
@@ -80,6 +79,8 @@ C_FILES += $(FOC_DIR)/src/st/st_usart.c
 endif
 endif
 
+ifeq ($(CFG_FOC_SUPPORT),yes)
+C_FLAGS += -DCFG_FOC_SUPPORT
 C_FILES += $(FOC_DIR)/src/main.c
 C_FILES += $(FOC_DIR)/src/irq.c
 C_FILES += $(FOC_DIR)/src/time.c
@@ -88,8 +89,14 @@ C_FILES += $(FOC_DIR)/src/led.c
 C_FILES += $(FOC_DIR)/src/log.c
 LD_FLAGS += -Wl,--wrap,printf
 
-LD_FLAGS += -Wl,--wrap=test
-
 C_INCLUDES += -I$(FOC_DIR)/include/bldc
-C_FILES += $(FOC_DIR)/src/bldc/bldc_pwm.c
-C_FILES += $(FOC_DIR)/src/bldc/bldc.c
+C_FILES += $(FOC_DIR)/src/bldc/bldc_manager.c
+C_FILES += $(FOC_DIR)/src/bldc/bldc_device.c
+C_FILES += $(FOC_DIR)/src/bldc/bldc_init.c
+endif
+
+ifeq ($(CFG_FOC_TEST_SUPPORT),yes)
+C_FLAGS += -DCFG_FOC_TEST_SUPPORT
+#C_FILES += $(FOC_DIR)/test/test_timer.c
+C_FILES += $(FOC_DIR)/test/test_bldc.c
+endif

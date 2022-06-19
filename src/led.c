@@ -5,24 +5,25 @@
 #include "timers.h"
 #include "semphr.h"
 
-#include "led.h"
+#include "foc_board.h"
+#include <st/st_gpio.h>
 
 static int led_set_on(enum LED_PIN pin)
 {
-	gpio_set_output_value(pin, Bit_RESET);
+	gpio_set_output_value(pin, OUTPUT_LOW);
 	return 0;
 }
 
 static int led_set_off(enum LED_PIN pin)
 {
-	gpio_set_output_value(pin, Bit_SET);
+	gpio_set_output_value(pin, OUTPUT_HIGH);
 	return 0;
 }
 
 static int led_resource_init()
 {
-	gpio_set_mode(LED_GREEN_PIN, GPIO_Mode_OUT);
-	gpio_set_mode(LED_RED_PIN, GPIO_Mode_OUT);
+	gpio_set_mode(LED_GREEN_PIN, MODE_OUTPUT);
+	gpio_set_mode(LED_RED_PIN, MODE_OUTPUT);
 	return 0;
 }
 

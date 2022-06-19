@@ -1,306 +1,330 @@
 #include <errno.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+
+#include "FreeRTOS.h"
+#include "task.h"
+
 #include <st/st_board.h>
+#include <st/st_reg.h>
+#include <st/st_utils.h>
 #include <st/st_gpio.h>
 
 #include "stm32f4xx_rcc.h"
 
-static inline GPIO_TypeDef * chip_pin_to_gpio_group(uint32_t pin)
+#define GET_BASIC_MODE(mode)				(mode & 0x0f)
+#define GET_ALTER_MODE(mode)				((mode & 0xf0) >> 4)
+
+enum {
+	GPIO_GROUP_A,
+	GPIO_GROUP_B,
+	GPIO_GROUP_C,
+	GPIO_GROUP_MAX,
+};
+
+enum {
+	GPIO_POS_0,
+	GPIO_POS_1,
+	GPIO_POS_2,
+	GPIO_POS_3,
+	GPIO_POS_4,
+	GPIO_POS_5,
+	GPIO_POS_6,
+	GPIO_POS_7,
+	GPIO_POS_8,
+	GPIO_POS_9,
+	GPIO_POS_10,
+	GPIO_POS_11,
+	GPIO_POS_12,
+	GPIO_POS_13,
+	GPIO_POS_14,
+	GPIO_POS_15,
+	GPIO_POS_MAX,
+};
+
+struct gpio_reg_t {
+	uint32_t base;
+	uint32_t mode;
+	uint32_t output_type;
+	uint32_t output_speed;
+	uint32_t pull_updown;
+	uint32_t input_value;
+	uint32_t output_value;
+	uint32_t alter[2];
+};
+
+struct chip_pin_t {
+	uint32_t chip_pin;
+	uint32_t gpio_pos;
+	struct gpio_device_t *device;
+	bool init_done;
+};
+
+struct gpio_device_t {
+	struct gpio_reg_t reg;
+	uint32_t periph_clock;
+	bool clock_enable;
+};
+
+static struct gpio_device_t support_gpio_list[GPIO_GROUP_MAX];
+struct chip_pin_t support_chip_pin_list[] = {
+	{
+		.chip_pin = CHIP_PIN_14,
+		.gpio_pos = GPIO_POS_0,
+		.device = &support_gpio_list[GPIO_GROUP_A],
+	},
+	{
+		.chip_pin = CHIP_PIN_15,
+		.gpio_pos = GPIO_POS_1,
+		.device = &support_gpio_list[GPIO_GROUP_A],
+	},
+	{
+		.chip_pin = CHIP_PIN_16,
+		.gpio_pos = GPIO_POS_2,
+		.device = &support_gpio_list[GPIO_GROUP_A],
+	},
+	{
+		.chip_pin = CHIP_PIN_17,
+		.gpio_pos = GPIO_POS_3,
+		.device = &support_gpio_list[GPIO_GROUP_A],
+	},
+	{
+		.chip_pin = CHIP_PIN_23,
+		.gpio_pos = GPIO_POS_7,
+		.device = &support_gpio_list[GPIO_GROUP_A],
+	},
+	{
+		.chip_pin = CHIP_PIN_26,
+		.gpio_pos = GPIO_POS_0,
+		.device = &support_gpio_list[GPIO_GROUP_B],
+	},
+	{
+		.chip_pin = CHIP_PIN_27,
+		.gpio_pos = GPIO_POS_1,
+		.device = &support_gpio_list[GPIO_GROUP_B],
+	},
+	{
+		.chip_pin = CHIP_PIN_33,
+		.gpio_pos = GPIO_POS_12,
+		.device = &support_gpio_list[GPIO_GROUP_B],
+	},
+	{
+		.chip_pin = CHIP_PIN_34,
+		.gpio_pos = GPIO_POS_13,
+		.device = &support_gpio_list[GPIO_GROUP_B],
+	},
+	{
+		.chip_pin = CHIP_PIN_35,
+		.gpio_pos = GPIO_POS_14,
+		.device = &support_gpio_list[GPIO_GROUP_B],
+	},
+	{
+		.chip_pin = CHIP_PIN_36,
+		.gpio_pos = GPIO_POS_15,
+		.device = &support_gpio_list[GPIO_GROUP_B],
+	},
+	{
+		.chip_pin = CHIP_PIN_37,
+		.gpio_pos = GPIO_POS_6,
+		.device = &support_gpio_list[GPIO_GROUP_C],
+	},
+	{
+		.chip_pin = CHIP_PIN_38,
+		.gpio_pos = GPIO_POS_7,
+		.device = &support_gpio_list[GPIO_GROUP_C],
+	},
+	{
+		.chip_pin = CHIP_PIN_39,
+		.gpio_pos = GPIO_POS_8,
+		.device = &support_gpio_list[GPIO_GROUP_C],
+	},
+	{
+		.chip_pin = CHIP_PIN_40,
+		.gpio_pos = GPIO_POS_9,
+		.device = &support_gpio_list[GPIO_GROUP_C],
+	},
+	{
+		.chip_pin = CHIP_PIN_41,
+		.gpio_pos = GPIO_POS_8,
+		.device = &support_gpio_list[GPIO_GROUP_A],
+	},
+	{
+		.chip_pin = CHIP_PIN_42,
+		.gpio_pos = GPIO_POS_9,
+		.device = &support_gpio_list[GPIO_GROUP_A],
+	},
+	{
+		.chip_pin = CHIP_PIN_43,
+		.gpio_pos = GPIO_POS_10,
+		.device = &support_gpio_list[GPIO_GROUP_A],
+	},
+	{
+		.chip_pin = CHIP_PIN_58,
+		.gpio_pos = GPIO_POS_6,
+		.device = &support_gpio_list[GPIO_GROUP_B],
+	},
+	{
+		.chip_pin = CHIP_PIN_59,
+		.gpio_pos = GPIO_POS_7,
+		.device = &support_gpio_list[GPIO_GROUP_B],
+	},
+};
+
+static struct chip_pin_t *get_chip_pin_info(enum chip_pin pin)
 {
-	switch (pin) {
-	case CHIP_PIN_23:
-	case CHIP_PIN_41:
-	case CHIP_PIN_42:
-	case CHIP_PIN_43:
-		return GPIOA;
-	case CHIP_PIN_26:
-	case CHIP_PIN_27:
-	case CHIP_PIN_33:
-	case CHIP_PIN_34:
-	case CHIP_PIN_35:
-	case CHIP_PIN_36:
-	case CHIP_PIN_58:
-	case CHIP_PIN_59:
-		return GPIOB;
-	case CHIP_PIN_37:
-	case CHIP_PIN_38:
-	case CHIP_PIN_39:
-	case CHIP_PIN_40:
-		return GPIOC;
+	uint32_t i = 0;
+	struct chip_pin_t *pin_info = NULL;
+
+	for (i = 0; i < ARRAY_SIZE(support_chip_pin_list); i++) {
+		pin_info = &support_chip_pin_list[i];
+		if (pin_info->chip_pin == pin)
+			return pin_info;
 	}
 
 	return NULL;
 }
 
-static inline int chip_pin_to_periph_group(uint32_t pin)
+int gpio_set_output_type(enum chip_pin pin, uint8_t out_type)
 {
-	switch (pin) {
-	case CHIP_PIN_23:
-	case CHIP_PIN_41:
-	case CHIP_PIN_42:
-	case CHIP_PIN_43:
-		return RCC_AHB1Periph_GPIOA;
-	case CHIP_PIN_26:
-	case CHIP_PIN_27:
-	case CHIP_PIN_33:
-	case CHIP_PIN_34:
-	case CHIP_PIN_35:
-	case CHIP_PIN_36:
-	case CHIP_PIN_58:
-	case CHIP_PIN_59:
-		return RCC_AHB1Periph_GPIOB;
-	case CHIP_PIN_37:
-	case CHIP_PIN_38:
-	case CHIP_PIN_39:
-	case CHIP_PIN_40:
-		return RCC_AHB1Periph_GPIOC;
-	}
+	struct chip_pin_t *pin_info = NULL;
+	struct gpio_device_t *dev = NULL;
+	uint8_t shift_bits = 0;
 
-	return -EINVAL;
-}
+	pin_info = get_chip_pin_info(pin);
+	configASSERT(pin_info);
 
-static inline int chip_pin_to_gpio_pin(uint32_t pin)
-{
-	switch (pin) {
-	case CHIP_PIN_26:
-		return GPIO_Pin_0;
-	case CHIP_PIN_27:
-		return GPIO_Pin_1;
-	case CHIP_PIN_37:
-	case CHIP_PIN_58:
-		return GPIO_Pin_6;
-	case CHIP_PIN_23:
-	case CHIP_PIN_38:
-	case CHIP_PIN_59:
-		return GPIO_Pin_7;
-	case CHIP_PIN_39:
-	case CHIP_PIN_41:
-		return GPIO_Pin_8;
-	case CHIP_PIN_40:
-	case CHIP_PIN_42:
-		return GPIO_Pin_9;
-	case CHIP_PIN_43:
-		return GPIO_Pin_10;
-	case CHIP_PIN_33:
-		return GPIO_Pin_12;
-	case CHIP_PIN_34:
-		return GPIO_Pin_13;
-	case CHIP_PIN_35:
-		return GPIO_Pin_14;
-	case CHIP_PIN_36:
-		return GPIO_Pin_15;
+	dev = pin_info->device;
+	if (!dev->clock_enable)
+		RCC_AHB1PeriphClockCmd(dev->periph_clock, true);
 
-	}
-
-	return -EINVAL;
-}
-
-static inline int gpio_pin_to_resoure(uint32_t pin)
-{
-	switch (pin) {
-	case GPIO_Pin_0:
-		return GPIO_PinSource0;
-	case GPIO_Pin_1:
-		return GPIO_PinSource1;
-	case GPIO_Pin_2:
-		return GPIO_PinSource2;
-	case GPIO_Pin_3:
-		return GPIO_PinSource3;
-	case GPIO_Pin_4:
-		return GPIO_PinSource4;
-	case GPIO_Pin_5:
-		return GPIO_PinSource5;
-	case GPIO_Pin_6:
-		return GPIO_PinSource6;
-	case GPIO_Pin_7:
-		return GPIO_PinSource7;
-	case GPIO_Pin_8:
-		return GPIO_PinSource8;
-	case GPIO_Pin_9:
-		return GPIO_PinSource9;
-	case GPIO_Pin_10:
-		return GPIO_PinSource10;
-	case GPIO_Pin_11:
-		return GPIO_PinSource11;
-	case GPIO_Pin_12:
-		return GPIO_PinSource12;
-	case GPIO_Pin_13:
-		return GPIO_PinSource13;
-	case GPIO_Pin_14:
-		return GPIO_PinSource14;
-	case GPIO_Pin_15:
-		return GPIO_PinSource15;
-	}
-	return -EINVAL;
-}
-
-static inline uint8_t gpio_pin_to_pos(uint32_t gpio_pin)
-{
-    uint8_t pos = -1;
-	uint32_t tmp = gpio_pin;
-
-	while (tmp) {
-		tmp = tmp >> 2;
-		pos++; 
-	}
-
-	return pos;
-}
-
-static bool is_output_or_af_mode(GPIO_TypeDef *gpio_group, uint32_t gpio_pin)
-{
-	uint8_t pos = gpio_pin_to_pos(gpio_pin);
-	return ((gpio_group->MODER >> (pos * 2) & GPIO_MODER_MODER0) >> 2) ? true : false;
-}
-
-static uint32_t gpio_af_mode_to_periph_clock(int af_mode)
-{
-	switch (af_mode) {
-	case GPIO_AF_TIM1:
-		return RCC_APB2Periph_TIM1;
-	case GPIO_AF_TIM8:
-		return RCC_APB2Periph_TIM8;
-	}
-
-	return -EINVAL;
-}
-
-#define IS_RCC_AHB1_PERIPH(PERIPH)			((((PERIPH) & 0x010BE800) == 0x00) && ((PERIPH) != 0x00))
-#define IS_RCC_AHB2_PERIPH(PERIPH)			((((PERIPH) & 0xFFFFFF0E) == 0x00) && ((PERIPH) != 0x00))
-
-static int gpio_af_mode_clock_enabledisable(int af_mode, bool enable)
-{
-	uint32_t periph_clock = gpio_af_mode_to_periph_clock(af_mode);
-
-	if (IS_RCC_AHB1_PERIPH(periph_clock)) {
-		RCC_AHB1PeriphClockCmd(periph_clock, enable);
-	} else if (IS_RCC_AHB2_PERIPH(periph_clock)) {
-		RCC_AHB2PeriphClockCmd(periph_clock, enable);
-	}
+	shift_bits = pin_info->gpio_pos * OUT_TYPE_SHIFT_BITS;
+	reg_bitwise_write(dev->reg.pull_updown, OUT_TYPE_MASK << shift_bits, out_type << shift_bits);
 	return 0;
 }
 
-int gpio_af_mode_clock_enable(int af_mode, bool enable)
+int gpio_set_output_speed(enum chip_pin pin, uint8_t speed)
 {
-	return gpio_af_mode_clock_enabledisable(af_mode, true);
-}
+	struct chip_pin_t *pin_info = NULL;
+	struct gpio_device_t *dev = NULL;
+	uint8_t shift_bits = 0;
 
-int gpio_af_mode_clock_disble(int af_mode, bool enable)
-{
-	return gpio_af_mode_clock_enabledisable(af_mode, false);
-}
+	pin_info = get_chip_pin_info(pin);
+	configASSERT(pin_info);
 
-int gpio_set_output_value(enum chip_pin pin, BitAction val)
-{
-	GPIO_TypeDef *gpio_group = NULL;
-	int gpio_pin = 0;
+	dev = pin_info->device;
+	if (!dev->clock_enable)
+		RCC_AHB1PeriphClockCmd(dev->periph_clock, true);
 
-	gpio_group = chip_pin_to_gpio_group(pin);
-	if (!gpio_group)
-		return -EINVAL;
-
-	gpio_pin = chip_pin_to_gpio_pin(pin);
-	if (gpio_pin < 0)
-		return gpio_pin;
-
-	GPIO_WriteBit(gpio_group, gpio_pin, val);
+	shift_bits = pin_info->gpio_pos * OUT_SPEED_SHIFT_BITS;
+	reg_bitwise_write(dev->reg.pull_updown, OUT_SPEED_MASK << shift_bits, speed << shift_bits);
 	return 0;
 }
 
-int gpio_set_mode(enum chip_pin pin, GPIOMode_TypeDef mode)
+int gpio_set_output_pupd(enum chip_pin pin, uint8_t pull_updown)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_TypeDef *gpio_group = NULL;
-	int periph_group = 0;
-	int gpio_pin = 0;
+	struct chip_pin_t *pin_info = NULL;
+	struct gpio_device_t *dev = NULL;
+	uint8_t shift_bits = 0;
 
-	memset(&GPIO_InitStructure, 0x00, sizeof(GPIO_InitStructure));
-	periph_group = chip_pin_to_periph_group(pin);
-	if (periph_group < 0)
-		return periph_group;
+	pin_info = get_chip_pin_info(pin);
+	configASSERT(pin_info);
 
-	gpio_group = chip_pin_to_gpio_group(pin);
-	if (!gpio_group)
-		return -EINVAL;
+	dev = pin_info->device;
+	if (!dev->clock_enable)
+		RCC_AHB1PeriphClockCmd(dev->periph_clock, true);
 
-	gpio_pin = chip_pin_to_gpio_pin(pin);
-	if (gpio_pin < 0) {
-		return gpio_pin;
+	shift_bits = pin_info->gpio_pos * PULL_UPDOWN_SHIFT_BITS;
+	reg_bitwise_write(dev->reg.pull_updown, PULL_UPDOWN_MASK << shift_bits, pull_updown << shift_bits);
+	return 0;
+}
+
+int gpio_set_mode(enum chip_pin pin, uint8_t mode)
+{
+	struct chip_pin_t *pin_info = NULL;
+	struct gpio_device_t *dev = NULL;
+	uint8_t basic_mode = 0;
+	uint8_t alter_mode = 0;
+	uint8_t shift_bits = 0;
+
+	pin_info = get_chip_pin_info(pin);
+	configASSERT(pin_info);
+
+	dev = pin_info->device;
+	if (!dev->clock_enable) {
+		RCC_AHB1PeriphClockCmd(dev->periph_clock, true);
+		dev->clock_enable = true;
 	}
 
-	RCC_AHB1PeriphClockCmd(periph_group, ENABLE);
-	GPIO_InitStructure.GPIO_Pin = gpio_pin;
-	GPIO_InitStructure.GPIO_Mode = mode;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(gpio_group, &GPIO_InitStructure);
-	return 0;
-}
-
-int gpio_set_af_mode(enum chip_pin pin, uint8_t mode)
-{
-	GPIO_TypeDef *gpio_group = NULL;
-	int gpio_pin = 0;
-	int gpio_resource = 0;
-
-	gpio_group = chip_pin_to_gpio_group(pin);
-	if (!gpio_group)
-		return -EINVAL;
-
-	gpio_pin = chip_pin_to_gpio_pin(pin);
-	if (gpio_pin < 0)
-		return gpio_pin;
-
-	gpio_resource = gpio_pin_to_resoure(gpio_pin);
-	if (gpio_resource < 0)
-		return gpio_resource;
-
-	GPIO_PinAFConfig(gpio_group, gpio_resource, mode);
-	return 0;
-}
-
-int gpio_set_output_type(enum chip_pin pin, GPIOOType_TypeDef otype)
-{
-	GPIO_TypeDef *gpio_group = NULL;
-	int gpio_pin = 0;
-	uint8_t pos = 0;
-
-	if (!is_output_or_af_mode(gpio_group, gpio_pin))
+	basic_mode = GET_BASIC_MODE(mode);
+	shift_bits = pin_info->gpio_pos * MODE_SHIFT_BITS;
+	reg_bitwise_write(dev->reg.mode, MODE_MASK << shift_bits, basic_mode << shift_bits);
+	if (pin_info->init_done)
 		return 0;
 
-	gpio_group = chip_pin_to_gpio_group(pin);
-	if (!gpio_group)
-		return -EINVAL;
+	if (basic_mode == MODE_OUTPUT || basic_mode == MODE_ALTER) {
+		shift_bits = pin_info->gpio_pos * OUT_TYPE_SHIFT_BITS;
+		reg_bitwise_write(dev->reg.output_type, OUT_TYPE_MASK << shift_bits, OUT_TYPE_DEFAULT << shift_bits);
 
-	gpio_pin = chip_pin_to_gpio_pin(pin);
-	if (gpio_pin < 0)
-		return gpio_pin;
+		shift_bits = pin_info->gpio_pos * OUT_SPEED_SHIFT_BITS;
+		reg_bitwise_write(dev->reg.output_speed, OUT_SPEED_MASK << shift_bits, OUT_SPEED_DEFAULT << shift_bits);
 
-	pos = gpio_pin_to_pos(gpio_pin);
-	gpio_group->OTYPER &= ~((GPIO_OTYPER_OT_0) << ((uint16_t)pos));
-	gpio_group->OTYPER |= (uint16_t)(((uint16_t)otype) << ((uint16_t)pos));
+		shift_bits = pin_info->gpio_pos * PULL_UPDOWN_SHIFT_BITS;
+		reg_bitwise_write(dev->reg.pull_updown, PULL_UPDOWN_MASK << shift_bits, PULL_UPDOWN_DEFAULT << shift_bits);
+	}
+
+	if (basic_mode == MODE_ALTER) {
+		alter_mode = GET_ALTER_MODE(mode);
+		shift_bits = (pin_info->gpio_pos % ALTER_MODE_PORT_BITS)* ALTER_MODE_SHIFT_BITS;
+		reg_bitwise_write(dev->reg.alter[pin_info->gpio_pos / ALTER_MODE_PORT_BITS],
+			ALTER_MODE_MASK << shift_bits, alter_mode << shift_bits);
+	}
+
+	pin_info->init_done = true;
 	return 0;
 }
 
-int gpio_set_output_pupd(enum chip_pin pin, GPIOPuPd_TypeDef pupd)
+int gpio_set_output_value(enum chip_pin pin, uint8_t val)
 {
-	GPIO_TypeDef *gpio_group = NULL;
-	int gpio_pin = 0;
-	uint8_t pos = 0;
+	struct chip_pin_t *pin_info = NULL;
+	struct gpio_device_t *dev = NULL;
+	uint8_t shift_bits = 0;
 
-	gpio_group = chip_pin_to_gpio_group(pin);
-	if (!gpio_group)
-		return -EINVAL;
+	pin_info = get_chip_pin_info(pin);
+	configASSERT(pin_info);
 
-	gpio_pin = chip_pin_to_gpio_pin(pin);
-	if (gpio_pin < 0)
-		return gpio_pin;
+	dev = pin_info->device;
+	if (!dev->clock_enable)
+		RCC_AHB1PeriphClockCmd(dev->periph_clock, true);
 
-	pos = gpio_pin_to_pos(gpio_pin);
-	gpio_group->PUPDR  &= ~((GPIO_PUPDR_PUPDR0) << ((uint16_t)pos * 2));
-	gpio_group->PUPDR |= (uint16_t)(((uint16_t)pupd) << ((uint16_t)pos * 2));
+	shift_bits = pin_info->gpio_pos * OUT_VALUE_SHIFT_BITS;
+	reg_bitwise_write(dev->reg.output_value, OUT_VALUE_MASK << shift_bits, val << shift_bits);
+	return 0;
+}
+
+int gpio_platform_init(void)
+{
+	int i = 0;
+	struct gpio_device_t *gpio_dev = NULL;
+	struct gpio_reg_t *gpio_reg = NULL;
+
+	for (i = 0; i < GPIO_GROUP_MAX; i++) {
+		gpio_dev = &support_gpio_list[i];
+		gpio_reg = &gpio_dev->reg;
+		gpio_reg->base = GPIO_BASE_REG + i * GPIOx_GROUP_BASE_OFFSET;
+		gpio_reg->mode = gpio_reg->base + GPIOx_MODE_OFFSET;
+		gpio_reg->output_type = gpio_reg->base + GPIOx_OUT_TYPE_OFFSET;
+		gpio_reg->output_speed = gpio_reg->base + GPIOx_OUT_SPEED_OFFSET;
+		gpio_reg->pull_updown = gpio_reg->base + GPIOx_PULL_UPDOWN_OFFSET;
+		gpio_reg->input_value = gpio_reg->base + GPIOx_IN_DATA_OFFSET;
+		gpio_reg->output_value = gpio_reg->base + GPIOx_OUT_DATA_OFFSET;
+		gpio_reg->alter[0] = gpio_reg->base + GPIOx_ALTER_LOW_OFFSET;
+		gpio_reg->alter[1] = gpio_reg->base + GPIOx_ALTER_HIGH_OFFSET;
+
+		gpio_dev->clock_enable = false;
+		gpio_dev->periph_clock = i >= 1 ? PERIPH_CLOCK_BIT_SHIFT << (i -1): 1;
+	}
+
 	return 0;
 }

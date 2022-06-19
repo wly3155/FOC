@@ -1,4 +1,5 @@
 #include "st/st_board.h"
+#include "st/st_gpio.h"
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
@@ -10,4 +11,6 @@ void prvSetupHardware(void)
 
 	/* Ensure all priority bits are assigned as preemption priority bits. */
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+
+	gpio_platform_init();
 }

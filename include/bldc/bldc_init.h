@@ -1,11 +1,11 @@
-#ifndef __LED_H__
-#define __LED_H__
+#ifndef __BLDC_INIT_H__
+#define __BLDC_INIT_H__
 
 #ifdef __cplusplus
 extern "c" {
 #endif
 
-void led_init(void);
+void bldc_init(void);
 
 #ifdef __cplusplus
 }

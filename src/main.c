@@ -111,7 +111,8 @@
 #include "main.h"
 #include "log.h"
 #include "led.h"
-#include "bldc.h"
+#include "bldc_init.h"
+#include "st/st_board.h"
 
 int main(void)
 {
@@ -121,6 +122,11 @@ int main(void)
 	logi("********foc start*********\n");
 	led_init();
 	bldc_init();
+
+#ifdef CFG_FOC_TEST_SUPPORT
+	extern void test_init(void);
+	test_init();
+#endif
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -183,5 +189,6 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 
 void assert_failed(uint8_t* file, uint32_t line)
 {
+	loge("ASSERT at %s %lu\n", file, line);
 	configASSERT(0);
 }

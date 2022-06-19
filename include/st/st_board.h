@@ -1,5 +1,5 @@
-#ifndef __FOC_BOARD_H__
-#define __FOC_BOARD_H__
+#ifndef __ST_BOARD_H__
+#define __ST_BOARD_H__
 
 #include "stm32f4xx.h"
 
@@ -8,6 +8,10 @@ extern "c" {
 #endif
 
 enum chip_pin {
+	CHIP_PIN_14 = 14,
+	CHIP_PIN_15 = 15,
+	CHIP_PIN_16 = 16,
+	CHIP_PIN_17 = 17,
 	CHIP_PIN_23 = 23,
 	CHIP_PIN_26 = 26,
 	CHIP_PIN_27 = 27,
@@ -26,13 +30,6 @@ enum chip_pin {
 	CHIP_PIN_59 = 59,
 	CHIP_PIN_MAX,
 };
-
-#define LED_G_PIN				(CHIP_PIN_33)
-#define LED_R_PIN				(CHIP_PIN_40)
-#define USART_TX_PIN			(CHIP_PIN_58)
-#define USART_RX_PIN			(CHIP_PIN_59)
-
-#define ARRAY_SIZE(x)			(sizeof(x)/sizeof(x[0]))
 
 enum {
 	RCC_APB1Periph,

@@ -8,6 +8,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "time.h"
+#include "foc_board.h"
 #include <st/st_board.h>
 #include <st/st_usart.h>
 

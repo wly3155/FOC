@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <st/st_board.h>
+#include <stm32f4xx_tim.h>
 
 #ifdef __cplusplus
 extern "c" {
@@ -20,11 +21,19 @@ enum pwm_channel {
 	channel_max,
 };
 
+enum {
+	LOW,
+	HIGH,
+};
+
 int pwm_init(enum chip_pin pin);
 int pwm_deinit(enum chip_pin pin);
 int pwm_set_freq(enum chip_pin pin, uint32_t freq_hz);
-int pwm_set_duty(enum chip_pin pin, float duty_percent, bool dual_polarity);
-int pwm_enabledisable(enum chip_pin pin, bool en);
+int pwm_set_duty(TIM_TypeDef *timer, enum pwm_channel channel, \
+	float duty_percent, bool dual_polarity);
+int pwm_set_complementary_output(TIM_TypeDef *timer, enum pwm_channel channel, \
+	bool pos_value, bool neg_value);
+int pwm_enabledisable(TIM_TypeDef *timer, bool en);
 
 #ifdef __cplusplus
 }
