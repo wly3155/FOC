@@ -6,6 +6,7 @@
 #include "semphr.h"
 
 #include "foc_board.h"
+#include "log.h"
 #include <st/st_gpio.h>
 
 static int led_set_on(enum LED_PIN pin)
@@ -31,8 +32,10 @@ static void led_task(void *param)
 {
 	while (1) {
 		led_set_on(LED_GREEN_PIN);
+		logi("set green led on\n");
 		vTaskDelay(pdMS_TO_TICKS(1000));
 		led_set_off(LED_GREEN_PIN);
+		logi("set green led off\n");
 		vTaskDelay(pdMS_TO_TICKS(1000));
 	}
 }
@@ -41,7 +44,9 @@ static void led_task2(void *param)
 {
 	while (1) {
 		led_set_on(LED_RED_PIN);
+		logi("set red led on\n");
 		vTaskDelay(pdMS_TO_TICKS(1000));
+		logi("set red led off\n");
 		led_set_off(LED_RED_PIN);
 		vTaskDelay(pdMS_TO_TICKS(1000));
 	}

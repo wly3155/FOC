@@ -14,14 +14,6 @@ enum {
 	MAX_INPUT_CAPTURE_GROUP,
 };
 
-enum {
-	CHANNEL_1 = 0,
-	CHANNEL_2,
-	CHANNEL_3,
-	CHANNEL_4,
-	MAX_CHANNEL,
-};
-
 int input_capture_enable(uint8_t group, uint8_t channel);
 int input_capture_disable(uint8_t group, uint8_t channel);
 int input_capture_init(uint8_t group, uint8_t channel);

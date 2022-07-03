@@ -23,7 +23,6 @@ static void test_task(void *param)
 	input_capture_bind_chip_pin(INPUT_CAPTURE_GROUP0, CHANNEL_3, INPUT_CAPTURE_CH3);
 	input_capture_bind_chip_pin(INPUT_CAPTURE_GROUP0, CHANNEL_4, INPUT_CAPTURE_CH4);
 
-
 	input_capture_init(INPUT_CAPTURE_GROUP0, CHANNEL_1);
 	input_capture_init(INPUT_CAPTURE_GROUP0, CHANNEL_2);
 	input_capture_init(INPUT_CAPTURE_GROUP0, CHANNEL_3);

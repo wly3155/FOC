@@ -295,7 +295,7 @@ static void log_header_format()
 	uint32_t sec = now / 1000000000;
 	uint32_t mini_sec = now % 1000000000 / 1000000;
 
-	snprintf(log_buf, sizeof(log_buf), "[%lu.%lu] ", sec, mini_sec);
+	snprintf(log_buf, sizeof(log_buf), "[%lu.%03lu] ", sec, mini_sec);
 }
 
 int __wrap_printf(const char *fmt, ...)

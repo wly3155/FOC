@@ -24,7 +24,8 @@ ac,b;101 5
 c,ab;001 1
 cb,a;011 3
 b,ca;010 2
-ab,c;110 6 */
+ab,c;110 6
+*/
 
 enum BLDC_STEP_ENCODER {
 	BLDC_100, /* step1 */
@@ -36,7 +37,6 @@ enum BLDC_STEP_ENCODER {
 	BLDC_STEPS_PRE_CYCLE,
 };
 
-
 struct bldc_device_pwm {
 	struct timer_device *base_timer;
 	uint8_t base_timer_id;
@@ -46,6 +46,7 @@ struct bldc_device_pwm {
 
 struct bldc_device {
 	uint8_t status;
+	int8_t error_num;
 	uint8_t direction;
 	uint8_t to_step;
 	float duty;
@@ -106,16 +107,9 @@ static int bldc_pwm_enabledisable(uint8_t bldc, bool en)
 	return 0;
 }
 
-static uint64_t now = 0, last = 0;
-static uint64_t diff = 0;
 static int bldc_pwm_irq_handler(void *private_data)
 {
 	uint8_t id = ptr_to_bldc_id(private_data);
-
-	now = get_boot_time_ns();
-	diff = now - last;
-	last = now;
-	//logi("%s trigger %u, delta %lu\n", __func__, id, (uint32_t)(now - last));
 
 	switch (id) {
 	case BLDC_ID_0:
@@ -177,7 +171,7 @@ static int bldc_device_update_step(struct bldc_event *event)
 
 static int bldc_device_startup(uint8_t id)
 {
-	bldc_pwm_enabledisable(id, true);
+	/* TBD */
 	return 0;
 }
 
@@ -205,9 +199,10 @@ static int bldc_device_enable(struct bldc_event *event)
 	struct bldc_device *dev = &bldc_dev[header->id];
 	struct bldc_control *ctrl = &event->ctrl;
 
-	dev->status = STATUS_RUNNING;
 	dev->duty = ctrl->duty;
-	bldc_device_startup(header->id);
+	if (dev->status == STATUS_IDLE)
+		bldc_device_startup(header->id);
+
 	return 0;
 }
 
