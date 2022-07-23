@@ -17,7 +17,7 @@
 
 #define config_BLDC_QUEUE_EVENT			(128)
 #define config_BLDC_SEND_QUEUE_WAIT		(10)
-#define config_BLDC_TASK_STACK_SIZE		(1024)
+#define config_BLDC_TASK_STACK_SIZE		(2048)
 #define config_BLDC_TASK_PRI			(configMAX_PRIORITIES - 1)
 
 struct bldc_manager {
@@ -32,23 +32,18 @@ static int bldc_event_enqueue(struct bldc_event *event)
 	int ret = 0;
 	BaseType_t xHigherPriorityTaskWoken;
 	struct bldc_manager *mgr = &bldc_mgr;
-
+	bool in_isr = false;
 	if (is_in_isr()) {
-		xQueueSendFromISR(mgr->event_queue, event, &xHigherPriorityTaskWoken);
+		in_isr = true;
+		ret = xQueueSendFromISR(mgr->event_queue, event, &xHigherPriorityTaskWoken);
  		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 	} else {
+		in_isr = false;
 		ret = xQueueSend(mgr->event_queue, event, config_BLDC_SEND_QUEUE_WAIT);
-		configASSERT(!(ret < 0));
 	}
 
-	return 0;
-}
-
-static int bldc_event_dequeue(struct bldc_event *event)
-{
-	struct bldc_manager *mgr = &bldc_mgr;
-
-	xQueueReceive(mgr->event_queue, &event, portMAX_DELAY);
+	configASSERT(ret);
+	logi("%s %p event type %u %d %d\n", __func__, mgr->event_queue, event->event_type, in_isr, ret);
 	return 0;
 }
 
@@ -72,13 +67,15 @@ static int bldc_handle_event(struct bldc_manager *mgr, struct bldc_event *event)
 		if (dev_interface->enable)
 			dev_interface->enable(event);
 		break;
-	case EVENT_CALIBRATE:
-		break;
 	case EVENT_CONFIG:
 		if (dev_interface->config)
 			dev_interface->config(event);
 		break;
-
+	case EVENT_CALIBRATE:
+		break;
+	default:
+		loge("%s unhandle event %u\n", __func__, event->event_type);
+		break;
 	}
 
 	return ret;
@@ -86,13 +83,15 @@ static int bldc_handle_event(struct bldc_manager *mgr, struct bldc_event *event)
 
 static void bldc_task(void *param)
 {
+	int ret = 0;
 	struct bldc_manager *mgr = (struct bldc_manager *)param;
 	struct bldc_event event;
 
-	logi("%s init\n", __func__);
-
 	while (1) {
-		bldc_event_dequeue(&event);
+		ret = xQueueReceive(mgr->event_queue, &event, portMAX_DELAY);
+		if (!ret)
+			continue;
+
 		bldc_handle_event(mgr, &event);
 	}
 }
@@ -154,6 +153,6 @@ void bldc_manager_init(void)
 
 	mgr->event_queue = xQueueCreate(config_BLDC_QUEUE_EVENT, sizeof(struct bldc_event));
 	configASSERT(mgr->event_queue);
-
-	xTaskCreate(bldc_task, "bldc", config_BLDC_TASK_STACK_SIZE, ( void * ) mgr, config_BLDC_TASK_PRI, NULL);
+	logi("%s %p\n", __func__, mgr->event_queue);
+	xTaskCreate(bldc_task, "bldc", config_BLDC_TASK_STACK_SIZE, (void *)mgr, config_BLDC_TASK_PRI, NULL);
 }
