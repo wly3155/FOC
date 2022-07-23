@@ -58,6 +58,7 @@ erase_and_download:
 	$(FLASH_TOOL) --reset write $(OUTPUT_DIR)/$(TARGET).bin $(FLASH_ADDR)
 
 download:
+	export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 	$(FLASH_TOOL) --reset write $(OUTPUT_DIR)/$(TARGET).bin $(FLASH_ADDR)
 
 gdb_server_start:
