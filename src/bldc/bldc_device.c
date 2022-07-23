@@ -12,10 +12,10 @@
 #include "bldc_device.h"
 
 #define BLDC_PWM_FREQ_HZ				(20000)
-#define BLDC_PWM_MAX_DUTY				(100)
+#define BLDC_PWM_MAX_DUTY			(100)
 
 #define ptr_to_bldc_id(ptr)				((uint8_t)((uint32_t)ptr))
-#define bldc_id_to_ptr(id)				((void *)((uint32_t)id))
+#define bldc_id_to_ptr(id)					((void *)((uint32_t)id))
 #define phase_to_channel(phase)			(phase + 1)
 
 /*
@@ -103,6 +103,7 @@ static int bldc_pwm_enabledisable(uint8_t bldc, bool en)
 	struct bldc_device_pwm *pwm_param = &bldc_pwm_param[bldc];
 	struct timer_device *timer_dev = pwm_param->base_timer;
 
+	logi("%s id %u en %u\n", __func__, bldc, en);
 	pwm_enabledisable(timer_dev->base_addr, en);
 	return 0;
 }
@@ -172,6 +173,7 @@ static int bldc_device_update_step(struct bldc_event *event)
 static int bldc_device_startup(uint8_t id)
 {
 	/* TBD */
+	bldc_pwm_enabledisable(id, true);
 	return 0;
 }
 
@@ -239,6 +241,20 @@ static int bldc_device_pwm_init(uint8_t id, uint32_t freq_hz)
 	pwm_param->base_timer = request_timer_device(pwm_param->base_timer_id);
 	configASSERT(pwm_param->base_timer);
 
+	pwm_bind_timer(id, pwm_param->base_timer_id);
+	pwm_bind_pin(id, PWM_CHANNEL0, pwm_param->high[PHASE_A]);
+	pwm_bind_pin(id, PWM_CHANNEL1, pwm_param->low[PHASE_A]);
+	pwm_bind_pin(id, PWM_CHANNEL2, pwm_param->high[PHASE_B]);
+	pwm_bind_pin(id, PWM_CHANNEL3, pwm_param->low[PHASE_B]);
+	pwm_bind_pin(id, PWM_CHANNEL4, pwm_param->high[PHASE_C]);
+	pwm_bind_pin(id, PWM_CHANNEL5, pwm_param->low[PHASE_C]);
+	pwm_init(id, PWM_CHANNEL0);
+	pwm_init(id, PWM_CHANNEL1);
+	pwm_init(id, PWM_CHANNEL2);
+	pwm_init(id, PWM_CHANNEL3);
+	pwm_init(id, PWM_CHANNEL4);
+	pwm_init(id, PWM_CHANNEL5);
+
 	timer_dev = pwm_param->base_timer;
 	timer_dev->freq_hz = freq_hz;
 	timer_dev->irq_enable = true;
@@ -247,11 +263,8 @@ static int bldc_device_pwm_init(uint8_t id, uint32_t freq_hz)
 	timer_dev->irq_request_type = TIM_IT_CC1 | TIM_IT_CC2 | TIM_IT_CC3;
 	timer_init(timer_dev);
 
-	for (phase = 0; phase < PHASE_MAX; phase++) {
-		pwm_init(pwm_param->high[phase]);
-		pwm_init(pwm_param->low[phase]);
+	for (phase = 0; phase < PHASE_MAX; phase++)
 		pwm_enabledisable(timer_dev->base_addr, false);
-	}
 
 	return 0;
 }

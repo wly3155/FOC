@@ -8,8 +8,20 @@
 #include <st/st_timer.h>
 #include <st/st_pwm.h>
 
+#include "FreeRTOS.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_tim.h"
+
+struct pwm_t {
+	bool timer_inited;
+	uint8_t timer_id;
+	struct timer_device *timer_dev;
+	uint32_t bind_pin[MAX_CHANNEL];
+	int (*irq_handler)(void *private_data);
+	void *private_data;
+};
+
+struct pwm_t support_pwm[MAX_PWM_GROUP];
 
 static int chip_pin_to_af_mode(uint32_t pin)
 {
@@ -52,19 +64,19 @@ int pwm_set_duty(TIM_TypeDef *timer, enum pwm_channel channel, float duty_percen
 	}
 
 	switch (channel) {
-	case channel_1:
+	case PWM_CHANNEL1:
 		TIM_OC1Init(timer, &TIM_OCInitStructure);
 		TIM_OC1PreloadConfig(timer, TIM_OCPreload_Enable);
 		break;
-	case channel_2:
+	case PWM_CHANNEL2:
 		TIM_OC2Init(timer, &TIM_OCInitStructure);
 		TIM_OC2PreloadConfig(timer, TIM_OCPreload_Enable);
 		break;
-	case channel_3:
+	case PWM_CHANNEL3:
 		TIM_OC3Init(timer, &TIM_OCInitStructure);
 		TIM_OC3PreloadConfig(timer, TIM_OCPreload_Enable);
 		break;
-	case channel_4:
+	case PWM_CHANNEL4:
 		TIM_OC4Init(timer, &TIM_OCInitStructure);
 		TIM_OC4PreloadConfig(timer, TIM_OCPreload_Enable);
 		break;
@@ -99,14 +111,41 @@ int pwm_enabledisable(TIM_TypeDef *timer, bool en)
 	return 0;
 }
 
-int pwm_init(enum chip_pin pin)
+int pwm_bind_timer(uint8_t group, uint8_t timer_id)
 {
-	int af_mode = chip_pin_to_af_mode(pin);
+	struct pwm_t *pwm = NULL;
 
-	return gpio_set_mode(pin, MODE_ATTR(af_mode, MODE_ALTER));
+	configASSERT(group < MAX_PWM_GROUP);
+	configASSERT(timer_id < TIMER_MAX);
+	pwm = &support_pwm[group];
+	pwm->timer_id = timer_id;
+	return 0;
 }
 
-int pwm_deinit(enum chip_pin pin)
+int pwm_bind_pin(uint8_t group, uint8_t channel, enum chip_pin pin)
+{
+	struct pwm_t *pwm = NULL;
+
+	configASSERT(group < MAX_PWM_GROUP);
+	configASSERT(channel < MAX_PWM_CHANNEL);
+	pwm = &support_pwm[group];
+	pwm->bind_pin[channel] = pin;
+	return 0;
+}
+
+int pwm_init(uint8_t group, uint8_t channel)
+{
+	struct pwm_t *pwm = NULL;
+	int af_mode = 0;
+
+	configASSERT(group < MAX_PWM_GROUP);
+	configASSERT(channel < MAX_PWM_CHANNEL);
+	pwm = &support_pwm[group];
+	af_mode = chip_pin_to_af_mode(pwm->bind_pin[channel]);
+	return gpio_set_mode(pwm->bind_pin[channel], MODE_ATTR(af_mode, MODE_ALTER));
+}
+
+int pwm_deinit(uint8_t group, uint8_t channel)
 {
 	return 0;
 }
