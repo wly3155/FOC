@@ -6,9 +6,9 @@ extern "c" {
 #endif
 
 enum {
-	BLDC_ID_0,
-	BLDC_ID_1,
-	MAX_DEV_NUM,
+    BLDC_ID_0,
+    BLDC_ID_1,
+    MAX_DEV_NUM,
 };
 
 #ifdef __cplusplus

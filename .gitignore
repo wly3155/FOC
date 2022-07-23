@@ -1,6 +1,16 @@
 # gitignore file
 *.o
 *.log
-*.code-workspace
+*.IAB
+*.IAD
+*.IMB
+*.IMD
+*.PFI
+*.PO
+*.PR
+*.PRI
+*.PS
+*.SearchResults
+*.WK3
 FOC_OUT/
 
