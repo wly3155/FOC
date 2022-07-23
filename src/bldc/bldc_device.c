@@ -103,6 +103,7 @@ static int bldc_pwm_enabledisable(uint8_t bldc, bool en)
 	struct bldc_device_pwm *pwm_param = &bldc_pwm_param[bldc];
 	struct timer_device *timer_dev = pwm_param->base_timer;
 
+	logi("%s id %u en %u\n", __func__, bldc, en);
 	pwm_enabledisable(timer_dev->base_addr, en);
 	return 0;
 }
@@ -172,6 +173,7 @@ static int bldc_device_update_step(struct bldc_event *event)
 static int bldc_device_startup(uint8_t id)
 {
 	/* TBD */
+	bldc_pwm_enabledisable(id, true);
 	return 0;
 }
 

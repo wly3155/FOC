@@ -54,7 +54,8 @@ int input_capture_disable(uint8_t group, uint8_t channel)
 	return timer_input_capture_disable(timer_dev, channel);
 }
 
-int input_capture_irq_register(uint8_t group, int (*irq_handler)(void *private_data), void *private_data)
+int input_capture_irq_register(uint8_t group,
+	int (*irq_handler)(void *private_data), void *private_data)
 {
 	struct input_capture_t *input_capture = NULL;
 
