@@ -1,5 +1,6 @@
 #include "st/st_board.h"
 #include "st/st_gpio.h"
+#include "st/st_timer.h"
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
@@ -13,4 +14,5 @@ void prvSetupHardware(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
 	gpio_platform_init();
+	timer_platform_init();
 }
