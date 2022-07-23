@@ -34,8 +34,8 @@ static void test_task(void *param)
 	input_capture_enable(INPUT_CAPTURE_GROUP0, CHANNEL_3);
 	input_capture_enable(INPUT_CAPTURE_GROUP0, CHANNEL_4);
 
-	bldc_enable(BLDC_ID_0, 0.3);
-
+	//bldc_enable(BLDC_ID_0, 0.3);
+	bldc_enable(BLDC_ID_1, 0.3);
 	while (1) {
 		vTaskDelay(pdMS_TO_TICKS(1000));
 	}
