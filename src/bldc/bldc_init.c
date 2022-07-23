@@ -3,6 +3,6 @@
 
 void bldc_init(void)
 {
-	bldc_manager_init();
-	bldc_device_init();
+    bldc_manager_init();
+    bldc_device_init();
 }
