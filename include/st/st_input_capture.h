@@ -10,8 +10,8 @@ extern "c" {
 #endif
 
 enum {
-	INPUT_CAPTURE_GROUP0,
-	MAX_INPUT_CAPTURE_GROUP,
+    INPUT_CAPTURE_GROUP0,
+    MAX_INPUT_CAPTURE_GROUP,
 };
 
 int input_capture_enable(uint8_t group, uint8_t channel);

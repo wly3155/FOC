@@ -10,73 +10,73 @@ extern "c" {
 #endif
 
 enum BLDC_MODE {
-	BLDC_PWM_ON_MODE,
-	BLDC_MAX_SUPPORT_MODE,
+    BLDC_PWM_ON_MODE,
+    BLDC_MAX_SUPPORT_MODE,
 };
 
 enum BLDC_EVENT {
-	EVENT_PUBLIC_START = 0,
-	EVENT_UPDATE = 	EVENT_PUBLIC_START,
-	EVENT_DISABLE,
-	EVENT_ENABLE,
-	EVENT_CALIBRATE,
-	EVENT_CONFIG,
-	EVENT_PUBLIC_END,
+    EVENT_PUBLIC_START = 0,
+    EVENT_UPDATE =     EVENT_PUBLIC_START,
+    EVENT_DISABLE,
+    EVENT_ENABLE,
+    EVENT_CALIBRATE,
+    EVENT_CONFIG,
+    EVENT_PUBLIC_END,
 
-	EVENT_PRIVATE_START = 128,
-	EVENT_PRIVATE_END = 160,
+    EVENT_PRIVATE_START = 128,
+    EVENT_PRIVATE_END = 160,
 };
 
 enum BLDC_STATUS {
-	STATUS_UNINIT = 0,
-	STATUS_IDLE,
-	STATUS_STARTUP,
-	STATUS_RUNNING,
-	STATUS_ERROR,
-	STATUS_END,
+    STATUS_UNINIT = 0,
+    STATUS_IDLE,
+    STATUS_STARTUP,
+    STATUS_RUNNING,
+    STATUS_ERROR,
+    STATUS_END,
 };
 
 enum BLDC_DIR {
-	DIR_CW,
-	DIR_CCW,
+    DIR_CW,
+    DIR_CCW,
 };
 
 enum BLDC_CFG_CMD {
-	DIRECTION,
-	MAX_CFG_CMD,
+    DIRECTION,
+    MAX_CFG_CMD,
 };
 
 struct bldc_header {
-	uint8_t id;
-	uint8_t padding;
-	uint8_t reserved;
+    uint8_t id;
+    uint8_t padding;
+    uint8_t reserved;
 };
 
 struct bldc_control {
-	uint8_t dir;
-	float duty;
+    uint8_t dir;
+    float duty;
 };
 
 struct bldc_config {
-	uint8_t cmd;
-	uint8_t data[6];
-	uint8_t len;
+    uint8_t cmd;
+    uint8_t data[6];
+    uint8_t len;
 };
 
 struct bldc_event {
-	uint8_t event_type;
-	struct bldc_header header;
-	union {
-		struct bldc_control ctrl;
-		struct bldc_config cfg;
-	};
+    uint8_t event_type;
+    struct bldc_header header;
+    union {
+        struct bldc_control ctrl;
+        struct bldc_config cfg;
+    };
 };
 
 struct bldc_device_interface {
-	int (*update_step)(struct bldc_event *);
-	int (*enable)(struct bldc_event *);
-	int (*disable)(struct bldc_event *);
-	int (*config)(struct bldc_event *);
+    int (*update_step)(struct bldc_event *);
+    int (*enable)(struct bldc_event *);
+    int (*disable)(struct bldc_event *);
+    int (*config)(struct bldc_event *);
 };
 
 int bldc_update(uint8_t id);
