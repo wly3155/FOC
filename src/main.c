@@ -187,8 +187,10 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 	for( ;; );
 }
 
+
 void assert_failed(uint8_t* file, uint32_t line)
 {
 	loge("ASSERT at %s %lu\n", file, line);
-	configASSERT(0);
+	taskDISABLE_INTERRUPTS();
+	for( ;; );
 }
