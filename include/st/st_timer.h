@@ -40,7 +40,6 @@ enum {
 };
 
 struct timer_reg_t {
-	uint32_t base;
 	uint32_t cr1;
 	uint32_t cr2;
 	uint32_t smcr;
@@ -61,6 +60,7 @@ struct timer_device {
 	uint8_t id;
 	bool in_use;
 	uint32_t freq_hz;
+	uint32_t reg_base;
 	struct timer_reg_t regs;
 	TIM_TypeDef *base_addr;
 	uint32_t periph_clock;
@@ -81,6 +81,7 @@ int timer_input_capture_init(struct timer_device *dev, uint8_t channel);
 int timer_input_capture_enable(struct timer_device *dev, uint8_t channel);
 int timer_input_capture_disable(struct timer_device *dev, uint8_t channel);
 
+int timer_platform_init(void);
 #ifdef __cplusplus
 }
 #endif

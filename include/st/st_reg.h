@@ -9,9 +9,9 @@ extern "c" {
 #endif
 
 #define reg_readl(reg)							(uint32_t)(*((volatile uint32_t *)(reg)))
-#define reg_writel(reg, val)					(*(volatile unsigned int *)(reg) = (val))
+#define reg_writel(reg, val)					(*(volatile uint32_t *)(reg) = (uint32_t)(val))
 
-static inline uint32_t reg_bitwise_write(volatile uint32_t reg, uint32_t bitwise, uint32_t value)
+static uint32_t reg_bitwise_write(volatile uint32_t reg, uint32_t bitwise, uint32_t value)
 {
 	uint32_t tmp = reg_readl(reg);
 
@@ -44,7 +44,7 @@ static inline uint32_t reg_bitwise_write(volatile uint32_t reg, uint32_t bitwise
 #define OUT_VALUE_SHIFT_BITS			(0x01)
 #define OUT_VALUE_MASK					((1 << OUT_VALUE_SHIFT_BITS) - 1)
 
-#define OUT_TYPE_DEFAULT				(0x00)
+#define OUT_TYPE_DEFAULT				(0x00) //PUSH_PULL_MODE
 #define OUT_TYPE_SHIFT_BITS				(0x01)
 #define OUT_TYPE_MASK					((1 << OUT_TYPE_SHIFT_BITS) - 1)
 
@@ -82,12 +82,19 @@ static inline uint32_t reg_bitwise_write(volatile uint32_t reg, uint32_t bitwise
 #define TIMX_CCR_OFFSET					(0x34)
 #define TIMX_DCR_OFFSET					(0x48)
 #define TIMX_DMAR_OFFSET				(0x4C)
-
-#define TIMX_CCMR_OFFSET				(0x04)
-#define TIMX_CCR_CH_OFFSET				(0x04)
-
 #define TIMX_REG_WIDTH					(0x10)
 
+#define TIMX_CCMR_CH_OFFSET				(0x04)
+#define TIMX_CCR_CH_OFFSET				(0x04)
+
+/* stm32f405 timer cr1 setting */
+#define UDIS_SHIFT_BITS					(0x01)
+#define UDIS_BIT_WIDTH					(0x01)
+#define UDIS_MASK_MASK					((1 << UDIS_BIT_WIDTH) - 1)
+#define UDIS_ENABLE						(0x00)
+#define UDIS_DISABLE					(0x01)
+
+/* stm32f405 timer ccmr setting */
 #define CCMR_CH_SHIFT_BITS				(0x08)
 #define CCXS_SHIFT_BITS					(0x00)
 #define CCXS_BIT_WIDTH					(0x02)
@@ -104,6 +111,7 @@ static inline uint32_t reg_bitwise_write(volatile uint32_t reg, uint32_t bitwise
 #define ICXF_MASK						((1 << ICXF_SHIFT_BITS) - 1)
 #define ICXF_NO_FILTER					(0x00)
 
+/* stm32f405 timer ccer setting */
 #define CCER_CH_SHIFT_BITS				(0x04)
 #define CCXNP_SHIFT_BITS				(0x01)
 #define CCXNP_BIT_WIDTH					(0x03)
