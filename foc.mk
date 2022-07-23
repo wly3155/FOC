@@ -3,6 +3,8 @@ include foc.config
 PROJECT=FOC
 FOC_DIR=.
 
+PROJECT_DIR=~/Documents/project
+
 ifeq ($(CFG_STM32F405RGT6_SUPPORT),yes)
 C_FLAGS += -DUSE_FULL_ASSERT
 C_FLAGS += -DSTM32F40_41xxx
@@ -36,11 +38,11 @@ C_FILES += $(STM32_TEMPLATES_DIR)/system_stm32f4xx.c
 
 LD_LIBS +=
 
-FLASH_TOOL_DIR = /usr/local/bin
-FLASH_TOOL = $(FLASH_TOOL_DIR)/st-flash
+FLASH_TOOL_DIR = /usr/local
+FLASH_TOOL = $(FLASH_TOOL_DIR)/bin/st-flash
 FLASH_ADDR = 0x08000000
 FLASH_SIZE = 0x00100000
-GDB_SERVER = $(FLASH_TOOL_DIR)/st-util
+GDB_SERVER = $(FLASH_TOOL_DIR)/bin/st-util
 
 OPENOCD_TOOL_DIR = /usr/local/bin
 OPENOCD_TOOL = $(OPENOCD_TOOL_DIR)/openocd
@@ -67,32 +69,29 @@ endif
 ifeq ($(CFG_ST_BOARD_SUPPORT),yes)
 C_FLAGS += -DCFG_ST_BOARD_SUPPORT
 C_INCLUDES += -I$(FOC_DIR)/include
-C_FILES += $(FOC_DIR)/src/st/st_board.c
-C_FILES += $(FOC_DIR)/src/st/st_gpio.c
-C_FILES += $(FOC_DIR)/src/st/st_timer.c
-C_FILES += $(FOC_DIR)/src/st/st_pwm.c
-C_FILES += $(FOC_DIR)/src/st/st_input_capture.c
-
+C_FILES += $(FOC_DIR)/source/arm/time.c
+C_FILES += $(FOC_DIR)/source/st/st_board.c
+C_FILES += $(FOC_DIR)/source/st/st_gpio.c
+C_FILES += $(FOC_DIR)/source/st/st_timer.c
+C_FILES += $(FOC_DIR)/source/st/st_pwm.c
+C_FILES += $(FOC_DIR)/source/st/st_input_capture.c
 ifeq ($(CFG_USART_SUPPORT),yes)
 C_FLAGS += -DCFG_USART_SUPPORT
-C_FILES += $(FOC_DIR)/src/st/st_usart.c
+C_FILES += $(FOC_DIR)/source/st/st_usart.c
 endif
 endif
 
 ifeq ($(CFG_FOC_SUPPORT),yes)
 C_FLAGS += -DCFG_FOC_SUPPORT
-C_FILES += $(FOC_DIR)/src/main.c
-C_FILES += $(FOC_DIR)/src/irq.c
-C_FILES += $(FOC_DIR)/src/time.c
-C_FILES += $(FOC_DIR)/src/led.c
-
-C_FILES += $(FOC_DIR)/src/log.c
-LD_FLAGS += -Wl,--wrap,printf
-
 C_INCLUDES += -I$(FOC_DIR)/include/bldc
-C_FILES += $(FOC_DIR)/src/bldc/bldc_manager.c
-C_FILES += $(FOC_DIR)/src/bldc/bldc_device.c
-C_FILES += $(FOC_DIR)/src/bldc/bldc_init.c
+C_FILES += $(FOC_DIR)/source/main.c
+C_FILES += $(FOC_DIR)/source/irq.c
+C_FILES += $(FOC_DIR)/source/led.c
+C_FILES += $(FOC_DIR)/source/log.c
+LD_FLAGS += -Wl,--wrap,printf
+C_FILES += $(FOC_DIR)/source/bldc/bldc_manager.c
+C_FILES += $(FOC_DIR)/source/bldc/bldc_device.c
+C_FILES += $(FOC_DIR)/source/bldc/bldc_init.c
 endif
 
 ifeq ($(CFG_FOC_TEST_SUPPORT),yes)
