@@ -12,10 +12,10 @@
 #include "bldc_device.h"
 
 #define BLDC_PWM_FREQ_HZ				(20000)
-#define BLDC_PWM_MAX_DUTY				(100)
+#define BLDC_PWM_MAX_DUTY			(100)
 
 #define ptr_to_bldc_id(ptr)				((uint8_t)((uint32_t)ptr))
-#define bldc_id_to_ptr(id)				((void *)((uint32_t)id))
+#define bldc_id_to_ptr(id)					((void *)((uint32_t)id))
 #define phase_to_channel(phase)			(phase + 1)
 
 /*
@@ -103,6 +103,7 @@ static int bldc_pwm_enabledisable(uint8_t bldc, bool en)
 	struct bldc_device_pwm *pwm_param = &bldc_pwm_param[bldc];
 	struct timer_device *timer_dev = pwm_param->base_timer;
 
+	logi("%s id %u en %u\n", __func__, bldc, en);
 	pwm_enabledisable(timer_dev->base_addr, en);
 	return 0;
 }
@@ -172,6 +173,7 @@ static int bldc_device_update_step(struct bldc_event *event)
 static int bldc_device_startup(uint8_t id)
 {
 	/* TBD */
+	bldc_pwm_enabledisable(id, true);
 	return 0;
 }
 

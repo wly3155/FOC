@@ -85,37 +85,72 @@ __weak void EXTI15_10_IRQHandler(void)
 void BusFault_Handler(void)
 {
 	loge("%s\n", __func__);
-	while (1) {
-	}
+	configASSERT(0);
 }
 
 void UsageFault_Handler(void)
 {
 	loge("%s\n", __func__);
-	while (1) {
-	}
+	configASSERT(0);
 }
 
 void DebugMon_Handler(void)
 {
 	loge("%s\n", __func__);
+	configASSERT(0);
 }
 void NMI_Handler(void)
 {
+	loge("%s\n", __func__);
+	configASSERT(0);
+}
+
+void pop_registers_from_fault_stack(unsigned int * hardfault_args)
+{
+	unsigned int stacked_r0;
+	unsigned int stacked_r1;
+	unsigned int stacked_r2;
+	unsigned int stacked_r3;
+	unsigned int stacked_r12;
+	unsigned int stacked_lr;
+	unsigned int stacked_pc;
+	unsigned int stacked_psr;
+
+	stacked_r0 = ((unsigned long) hardfault_args[0]);
+	stacked_r1 = ((unsigned long) hardfault_args[1]);
+	stacked_r2 = ((unsigned long) hardfault_args[2]);
+	stacked_r3 = ((unsigned long) hardfault_args[3]);
+	stacked_r12 = ((unsigned long) hardfault_args[4]);
+	stacked_lr = ((unsigned long) hardfault_args[5]);
+	stacked_pc = ((unsigned long) hardfault_args[6]);
+	stacked_psr = ((unsigned long) hardfault_args[7]);
+	/* Inspect stacked_pc to locate the offending instruction. */
+	logi("dump regs: 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n",
+		stacked_r0, stacked_r1, stacked_r2, stacked_r3,
+		stacked_r12, stacked_lr, stacked_pc , stacked_psr);
+	for( ;; );
 }
 
 void HardFault_Handler(void)
 {
-	loge("%s\n", __func__);
-	while (1) {
-	}
+	asm volatile
+    (
+        " tst lr, #4                                                \n"
+        " ite eq                                                    \n"
+        " mrseq r0, msp                                             \n"
+        " mrsne r0, psp                                             \n"
+        " ldr r1, [r0, #24]                                         \n"
+        " ldr r2, handler2_address_const                            \n"
+        " bx r2                                                     \n"
+        " handler2_address_const: .word pop_registers_from_fault_stack    \n"
+    );
+	configASSERT(0);
 }
 
 void MemManage_Handler(void)
 {
 	loge("%s\n", __func__);
-	while (1) {
-	}
+	configASSERT(0);
 }
 
 void TIM2_IRQHandler(void)
