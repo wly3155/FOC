@@ -9,6 +9,7 @@
 
 bool is_in_isr(void);
 void irq_register(uint8_t irq_num, int (*irq_handler)(void *private_data), void *private_data);
+void irq_init(void);
 
 #ifndef __weak
 #define __weak __attribute__((weak))
