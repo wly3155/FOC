@@ -31,6 +31,8 @@
 
 #include "stm32f4xx_rcc.h"
 
+#include <utils.h>
+
 #define GET_BASIC_MODE(mode)                (mode & 0x0f)
 #define GET_ALTER_MODE(mode)                ((mode & 0xf0) >> 4)
 
@@ -83,6 +85,7 @@ struct gpio_device_t {
     struct gpio_reg_t reg;
     uint32_t periph_clock;
     bool clock_enable;
+    uint8_t group_num;
 };
 
 static struct gpio_device_t support_gpio_list[GPIO_GROUP_MAX];
@@ -111,6 +114,16 @@ static struct chip_pin_t support_chip_pin_list[] = {
         .chip_pin = CHIP_PIN_23,
         .gpio_pos = GPIO_POS_7,
         .device = &support_gpio_list[GPIO_GROUP_A],
+    },
+    {
+        .chip_pin = CHIP_PIN_24,
+        .gpio_pos = GPIO_POS_4,
+        .device = &support_gpio_list[GPIO_GROUP_C],
+    },
+    {
+        .chip_pin = CHIP_PIN_25,
+        .gpio_pos = GPIO_POS_5,
+        .device = &support_gpio_list[GPIO_GROUP_C],
     },
     {
         .chip_pin = CHIP_PIN_26,
@@ -239,7 +252,7 @@ int gpio_set_output_speed(enum chip_pin pin, uint8_t speed)
     return 0;
 }
 
-int gpio_set_output_pupd(enum chip_pin pin, uint8_t pull_updown)
+int gpio_set_input_pupd(enum chip_pin pin, uint8_t pull_updown)
 {
     struct chip_pin_t *pin_info = NULL;
     struct gpio_device_t *dev = NULL;
@@ -320,6 +333,25 @@ int gpio_set_output_value(enum chip_pin pin, uint8_t val)
     return 0;
 }
 
+int get_exti_info_from_chip_pin(enum chip_pin pin,
+        struct exit_info_t *exit_info)
+{
+    uint8_t i = 0;
+    struct chip_pin_t *pin_info = NULL;
+
+    for (i = 0; i < ARRAY_SIZE(support_chip_pin_list); i++) {
+        pin_info = &support_chip_pin_list[i];
+        if (pin_info->chip_pin == pin) {
+            exit_info->port_source = pin_info->device->group_num;
+            exit_info->pin_source = pin_info->gpio_pos;
+            exit_info->line = 2 << pin_info->gpio_pos;
+            return 0;
+        }
+    }
+
+    return -ENODEV;
+}
+
 int gpio_platform_init(void)
 {
     int i = 0;
@@ -341,6 +373,7 @@ int gpio_platform_init(void)
 
         gpio_dev->clock_enable = false;
         gpio_dev->periph_clock = i >= 1 ? PERIPH_CLOCK_BIT_SHIFT << (i -1): 1;
+        gpio_dev->group_num = i;
     }
 
     return 0;

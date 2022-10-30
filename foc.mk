@@ -26,6 +26,7 @@ C_INCLUDES += -I$(STM32_CMSIS_DIR)/Device/ST/STM32F4xx/Include
 ASM_FILES += $(STM32_CMSIS_DIR)/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f40_41xxx.s
 
 C_INCLUDES += -I$(STM32_PERIPH_DIR)/inc
+C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_syscfg.c
 C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_rcc.c
 C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_exti.c
 C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_gpio.c
@@ -75,6 +76,7 @@ C_FILES += $(FOC_DIR)/source/st/st_gpio.c
 C_FILES += $(FOC_DIR)/source/st/st_timer.c
 C_FILES += $(FOC_DIR)/source/st/st_pwm.c
 C_FILES += $(FOC_DIR)/source/st/st_input_capture.c
+C_FILES += $(FOC_DIR)/source/st/st_exti.c
 ifeq ($(CFG_USART_SUPPORT),yes)
 C_FLAGS += -DCFG_USART_SUPPORT
 C_FILES += $(FOC_DIR)/source/st/st_usart.c

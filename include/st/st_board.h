@@ -13,6 +13,8 @@ enum chip_pin {
     CHIP_PIN_16 = 16,
     CHIP_PIN_17 = 17,
     CHIP_PIN_23 = 23,
+    CHIP_PIN_24 = 24,
+    CHIP_PIN_25 = 25,
     CHIP_PIN_26 = 26,
     CHIP_PIN_27 = 27,
     CHIP_PIN_33 = 33,
