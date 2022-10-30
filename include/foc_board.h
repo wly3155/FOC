@@ -13,6 +13,7 @@ extern "c" {
 #define AXIS0_INL_A_PIN            (CHIP_PIN_36)
 #define AXIS0_INL_B_PIN            (CHIP_PIN_35)
 #define AXIS0_INL_C_PIN            (CHIP_PIN_34)
+#define AXIS0_ZCD_PIN              (CHIP_PIN_25)
 
 #define AXIS1_INH_A_PIN            (CHIP_PIN_37)
 #define AXIS1_INH_B_PIN            (CHIP_PIN_38)
@@ -20,6 +21,7 @@ extern "c" {
 #define AXIS1_INL_A_PIN            (CHIP_PIN_23)
 #define AXIS1_INL_B_PIN            (CHIP_PIN_26)
 #define AXIS1_INL_C_PIN            (CHIP_PIN_27)
+#define AXIS1_ZCD_PIN              (CHIP_PIN_24)
 
 #define INPUT_CAPTURE_CH1        (CHIP_PIN_14)
 #define INPUT_CAPTURE_CH2        (CHIP_PIN_15)

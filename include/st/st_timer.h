@@ -59,20 +59,20 @@ enum {
 };
 
 struct timer_reg_t {
-    uint32_t cr1;
-    uint32_t cr2;
-    uint32_t smcr;
-    uint32_t dier;
-    uint32_t sr;
-    uint32_t egr;
-    uint32_t ccmr[CCMR_MAX];
-    uint32_t ccer;
-    uint32_t cnt;
-    uint32_t psc;
-    uint32_t arr;
-    uint32_t ccr[CCR_CHANNEL_MAX];
-    uint32_t dcr;
-    uint32_t dmar;
+    __IO uint32_t cr1;
+    __IO uint32_t cr2;
+    __IO uint32_t smcr;
+    __IO uint32_t dier;
+    __IO uint32_t sr;
+    __IO uint32_t egr;
+    __IO uint32_t ccmr[CCMR_MAX];
+    __IO uint32_t ccer;
+    __IO uint32_t cnt;
+    __IO uint32_t psc;
+    __IO uint32_t arr;
+    __IO uint32_t ccr[CCR_CHANNEL_MAX];
+    __IO uint32_t dcr;
+    __IO uint32_t dmar;
 };
 
 struct timer_device {
@@ -81,7 +81,7 @@ struct timer_device {
     uint32_t freq_hz;
     uint32_t base_counter_freq_hz;
     uint32_t reg_base;
-    struct timer_reg_t regs;
+    struct timer_reg_t *regs;
     TIM_TypeDef *base_addr;
     uint32_t periph_clock;
     uint32_t periph_clock_group;

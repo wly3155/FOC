@@ -60,11 +60,25 @@ enum {
     OUTPUT_HIGH,
 };
 
+enum {
+    NO_PULL,
+    PULL_UP,
+    PULL_DOWN,
+};
+
+struct exit_info_t {
+    uint8_t port_source;
+    uint8_t pin_source;
+    uint32_t line;
+};
+
 int gpio_set_output_type(enum chip_pin pin, uint8_t out_type);
 int gpio_set_output_speed(enum chip_pin pin, uint8_t speed);
-int gpio_set_output_pupd(enum chip_pin pin, uint8_t pull_updown);
+int gpio_set_input_pupd(enum chip_pin pin, uint8_t pull_updown);
 int gpio_set_mode(enum chip_pin pin, uint8_t mode);
 int gpio_set_output_value(enum chip_pin pin, uint8_t val);
+int get_exti_info_from_chip_pin(enum chip_pin pin,
+        struct exit_info_t *exit_info);
 int gpio_platform_init(void);
 
 #ifdef __cplusplus

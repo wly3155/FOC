@@ -149,5 +149,7 @@ void bldc_manager_init(void)
     mgr->event_queue = xQueueCreate(config_BLDC_QUEUE_EVENT, sizeof(struct bldc_event));
     configASSERT(mgr->event_queue);
     logi("%s %p\n", __func__, mgr->event_queue);
-    xTaskCreate(bldc_task, "bldc", config_BLDC_TASK_STACK_SIZE, (void *)mgr, config_BLDC_TASK_PRI, NULL);
+    xTaskCreate(bldc_task, "bldc", config_BLDC_TASK_STACK_SIZE,
+        (void *)mgr, config_BLDC_TASK_PRI, NULL);
 }
+

@@ -48,6 +48,7 @@
 #else
 #ifdef STM32F40_41xxx
 	#include "system_stm32f4xx.h"
+    #include "main.h"
 #endif
 #endif
 
@@ -119,7 +120,11 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 	
 /* Normal assert() semantics without relying on the provision of an assert.h
 header file. */
+#ifdef STM32F40_41xxx
 #define configASSERT( x ) if( ( x ) == 0 ) {assert_failed((uint8_t *)__FILE__, __LINE__);}
+#else
+#define configASSERT( x ) if( ( x ) == 0 ) {taskDISABLE_INTERRUPTS(); for( ;; );}
+#endif
 	
 /* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
 standard names. */
