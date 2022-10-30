@@ -20,8 +20,8 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <st/st_reg.h>
 #include <st/st_board.h>
+#include <st/st_reg.h>
 #include <st/st_gpio.h>
 #include <st/st_timer.h>
 #include <st/st_pwm.h>
@@ -45,13 +45,10 @@ enum {
 };
 
 struct pwm_t {
+	bool enabled;
     struct timer_device *timer_dev;
-    uint8_t bind_pin[MAX_PWM_CHANNEL][MAX_CHAN_PIN];
-    bool enabled;
     uint16_t freq_count;
     uint16_t duty_count[MAX_PWM_CHANNEL];
-    int (*irq_handler)(void *private_data);
-    void *private_data;
 };
 
 #define ptr_to_pwm_group(ptr)             ((uint8_t)((uint32_t)ptr))
@@ -64,8 +61,11 @@ static struct pwm_t support_pwm[MAX_PWM_GROUP];
 static int pwm_update_duty_count(struct pwm_t *pwm,
     uint8_t chn, uint16_t duty_count)
 {
-    reg_bitwise_write(pwm->timer_dev->regs.ccr[chn],
-        CCRX_MASK << CCRX_SHIFT_BITS, pwm->duty_count[chn] << CCRX_SHIFT_BITS);
+    struct timer_device *timer_dev = pwm->timer_dev;
+    struct timer_reg_t *timer_reg = (struct timer_reg_t *)timer_dev->regs;
+
+    reg_bitwise_write(timer_reg->ccr[chn], CCRX_MASK << CCRX_SHIFT_BITS,
+        pwm->duty_count[chn] << CCRX_SHIFT_BITS);
     return 0;
 }
 
@@ -78,12 +78,13 @@ static int pwm_irq_handler(void *private_data)
     uint8_t chn = 0;
 
     configASSERT(group < MAX_PWM_GROUP);
+
     pwm = &support_pwm[group];
     timer_dev = pwm->timer_dev;
-
-    status = reg_readl(timer_dev->regs.sr);
+    status = reg_readl(timer_dev->regs->sr);
     for (chn = 0; chn < MAX_PWM_CHANNEL; chn++) {
         if (status & pwm_chn_to_ccxit_bit(chn)) {
+            printf("%s group %u chn %u\n", __func__, group, chn);
             pwm->duty_count[chn] = pwm->freq_count - pwm->duty_count[chn];
             pwm_update_duty_count(pwm, chn, pwm->duty_count[chn]);
         }
@@ -96,6 +97,9 @@ static int pwm_set_idle_status(uint8_t group, uint8_t channel,
     bool pos_value, bool neg_value)
 {
     struct pwm_t *pwm = &support_pwm[group];
+    struct timer_device *timer_dev = pwm->timer_dev;
+    struct timer_reg_t *timer_reg = (struct timer_reg_t *)timer_dev->regs;
+
     uint8_t shift_bits = 0;
     uint16_t mask = 0, value = 0;
 
@@ -104,19 +108,22 @@ static int pwm_set_idle_status(uint8_t group, uint8_t channel,
         | (OISNX_MASK << (shift_bits + OISNX_SHIFT_BITS));
     value = (pos_value << (shift_bits + OISX_SHIFT_BITS))
         | (neg_value << (shift_bits + OISNX_SHIFT_BITS));
-    reg_bitwise_write(pwm->timer_dev->regs.cr2, mask, value);
+    reg_bitwise_write(timer_reg->cr2, mask, value);
     return 0;
 }
 
 static int pwm_enable(uint8_t group, bool en)
 {
     struct pwm_t *pwm = &support_pwm[group];
+    struct timer_device *timer_dev = pwm->timer_dev;
+    struct timer_reg_t *timer_reg = (struct timer_reg_t *)timer_dev->regs;
+
     uint8_t arpe_value = en ? ARPE_BUFFERED : ARPE_NOT_BUFFERED;
     uint8_t cen_value = en ? CEN_ENABLE : CEN_DISABLE;
 
-    reg_bitwise_write(pwm->timer_dev->regs.cr1,
+    reg_bitwise_write(timer_reg->cr1,
         ARPE_MASK_VALUE << ARPE_SHIBFT_BITS, arpe_value << ARPE_SHIBFT_BITS);
-    reg_bitwise_write(pwm->timer_dev->regs.cr1,
+    reg_bitwise_write(timer_reg->cr1,
         CEN_MASK_VALUE << CEN_SHIBFT_BITS, cen_value << CEN_SHIBFT_BITS);
     return 0;
 }
@@ -124,6 +131,9 @@ static int pwm_enable(uint8_t group, bool en)
 static int pwm_channel_enable(uint8_t group, uint8_t channel, bool en)
 {
     struct pwm_t *pwm = &support_pwm[group];
+    struct timer_device *timer_dev = pwm->timer_dev;
+    struct timer_reg_t *timer_reg = (struct timer_reg_t *)timer_dev->regs;
+
     uint8_t shift_bits = 0;
     uint16_t mask = 0, value = 0;
     uint8_t ccxe_en = 0;
@@ -136,7 +146,10 @@ static int pwm_channel_enable(uint8_t group, uint8_t channel, bool en)
     ccxne_en = en ? CCXNE_ENABLE : CCXNE_DISABLE;
     value = (ccxe_en << (shift_bits + CCXE_SHIFT_BITS)) \
         | (ccxne_en << (shift_bits + CCXNE_SHIFT_BITS));
-    reg_bitwise_write(pwm->timer_dev->regs.ccer, mask, value);
+    reg_bitwise_write(timer_reg->ccer, mask, value);
+
+    pwm_enable(group, true);
+
 
     return 0;
 }
@@ -224,11 +237,15 @@ static int pwm_setup(uint8_t group, uint8_t channel)
 {
     struct pwm_t *pwm = &support_pwm[group];
     struct timer_device *timer_dev = pwm->timer_dev;
+    struct timer_reg_t *timer_reg = timer_dev->regs;
     uint8_t shift_bits = 0;
     uint8_t ccmr_sel = 0;
     uint16_t mask = 0, value = 0;
 
     ccmr_sel = channel >= PWM_CHANNEL3 ? 1 : 0;
+    printf("%u %u read reg base addr %p, ccmr addr %p value %lx\n", group, channel, timer_reg,
+        &timer_reg->ccmr[ccmr_sel], reg_readl(timer_reg->ccmr[ccmr_sel]));
+
     shift_bits = channel >= PWM_CHANNEL3 ? (channel - PWM_CHANNEL3)
         * CCMR_CH_SHIFT_BITS : channel * CCMR_CH_SHIFT_BITS;
     mask = ((OCXFE_MASK << (shift_bits + OCXFE_SHIFT_BITS))
@@ -237,20 +254,23 @@ static int pwm_setup(uint8_t group, uint8_t channel)
     value = ((OCXFE_FAST_ENABLE << (shift_bits + ICXF_SHIFT_BITS))
         | (OCXPE_DISABLE << (shift_bits + ICXPSC_SHIFT_BITS))
         | (OCXM_TOGGLE << (shift_bits + CCXS_SHIFT_BITS)));
-    reg_bitwise_write(timer_dev->regs.ccmr[ccmr_sel], mask, value);
+    printf("%u %u setup ccmr %x %x\n", group, channel, mask, value);
+    reg_bitwise_write(timer_reg->ccmr[ccmr_sel], mask, value);
+    printf("%u %u read %lu: %lx\n", group, channel, timer_reg->ccmr[ccmr_sel],
+        reg_readl(timer_reg->ccmr[ccmr_sel]));
 
     shift_bits = CCER_CH_SHIFT_BITS * channel;
     mask = (CCXP_MASK << (shift_bits + CCXP_SHIFT_BITS))
         | (CCXNP_MASK << (shift_bits + CCXNP_SHIFT_BITS));
     value = (CCXP_ACTIVE_HIGH << (shift_bits + CCXP_SHIFT_BITS))
         | (CCXNP_ACTIVE_LOW << (shift_bits + CCXNP_SHIFT_BITS));
-    reg_bitwise_write(timer_dev->regs.ccer, mask, value);
+    reg_bitwise_write(timer_reg->ccer, mask, value);
 
     mask = (CCXE_MASK << (shift_bits + CCXE_SHIFT_BITS))
         | (CCXNE_MASK << (shift_bits + CCXNE_SHIFT_BITS));
     value = (CCXE_DISABLE << (shift_bits + CCXE_SHIFT_BITS))
         | (CCXNE_DISABLE << (shift_bits + CCXNE_SHIFT_BITS));
-    reg_bitwise_write(timer_dev->regs.ccer, mask, value);
+    reg_bitwise_write(timer_reg->ccer, mask, value);
 
     return 0;
 }
@@ -258,12 +278,10 @@ static int pwm_setup(uint8_t group, uint8_t channel)
 int pwm_init(uint8_t group, uint8_t channel)
 {
     int ret = 0;
-    struct pwm_t *pwm = &support_pwm[group];
 
+    printf("%s %u %u\n", __func__, group, channel);
     configASSERT(group < MAX_PWM_GROUP);
     configASSERT(channel < MAX_PWM_CHANNEL);
-
-    pwm->enabled = false;
 
     ret = pwm_setup(group, channel);
     if (ret < 0)

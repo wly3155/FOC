@@ -25,6 +25,10 @@
 extern "c" {
 #endif
 
+#ifndef __IO
+#define __IO                                (volatile)
+#endif
+
 #define reg_readl(reg)                      (uint32_t)(*((volatile uint32_t *)(reg)))
 #define reg_writel(reg, val)                (*(volatile uint32_t *)(reg) = (uint32_t)(val))
 
@@ -78,12 +82,12 @@ static inline uint32_t reg_bitwise_write(volatile uint32_t reg, uint32_t bitwise
 #define ALTER_MODE_MASK                     ((1 << ALTER_MODE_SHIFT_BITS) - 1)
 
 /* stm32f405 timer registers */
-#define TIM1_BASE_REG                       (0x40010000)
-#define TIM2_BASE_REG                       (0x40000000)
-#define TIM3_BASE_REG                       (0x40000400)
-#define TIM4_BASE_REG                       (0x40000800)
-#define TIM5_BASE_REG                       (0x40000C00)
-#define TIM8_BASE_REG                       (0x40010400)
+#define TIM1_BASE_REG                       (struct timer_reg_t *)(0x40010000)
+#define TIM2_BASE_REG                       (struct timer_reg_t *)(0x40000000)
+#define TIM3_BASE_REG                       (struct timer_reg_t *)(0x40000400)
+#define TIM4_BASE_REG                       (struct timer_reg_t *)(0x40000800)
+#define TIM5_BASE_REG                       (struct timer_reg_t *)(0x40000C00)
+#define TIM8_BASE_REG                       (struct timer_reg_t *)(0x40010400)
 #define TIMX_CR1_OFFSET                     (0x00)
 #define TIMX_CR2_OFFSET                     (0x04)
 #define TIMX_SMCR_OFFSET                    (0x08)

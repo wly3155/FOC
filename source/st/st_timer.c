@@ -19,11 +19,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <st/st_reg.h>
 #include <st/st_board.h>
+#include <st/st_reg.h>
 #include <st/st_gpio.h>
 #include <st/st_timer.h>
-#include <st/st_utils.h>
 
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
@@ -32,6 +31,7 @@
 
 #include "time.h"
 #include "irq.h"
+#include <utils.h>
 
 #define ptr_to_timer_id(ptr)                  ((uint32_t)ptr)
 #define ptr_to_timer_irq_num(ptr)             ((uint32_t)ptr)
@@ -54,6 +54,7 @@ static struct timer_device support_timer_list[] = {
         .irq_enable = false,
         .irq_num = TIM1_CC_IRQn,
         .base_addr = TIM1,
+        .regs = TIM1_BASE_REG,
         .periph_clock = RCC_APB2Periph_TIM1,
         .periph_clock_group = RCC_APB2Periph,
     },
@@ -64,6 +65,7 @@ static struct timer_device support_timer_list[] = {
         .irq_enable = false,
         .irq_num = TIM2_IRQn,
         .base_addr = TIM2,
+        .regs = TIM2_BASE_REG,
         .periph_clock = RCC_APB1Periph_TIM2,
         .periph_clock_group = RCC_APB1Periph,
     },
@@ -74,6 +76,7 @@ static struct timer_device support_timer_list[] = {
         .irq_enable = false,
         .irq_num = TIM5_IRQn,
         .base_addr = TIM5,
+        .regs = TIM5_BASE_REG,
         .periph_clock = RCC_APB1Periph_TIM5,
         .periph_clock_group = RCC_APB1Periph,
     },
@@ -84,6 +87,7 @@ static struct timer_device support_timer_list[] = {
         .irq_enable = false,
         .irq_num = TIM8_CC_IRQn,
         .base_addr = TIM8,
+        .regs = TIM8_BASE_REG,
         .periph_clock = RCC_APB2Periph_TIM8,
         .periph_clock_group = RCC_APB2Periph,
     },
@@ -204,11 +208,11 @@ int timer_input_capture_enable(struct timer_device *dev, uint8_t channel)
 {
     uint8_t shift_bits = 0;
 
-    if (!(dev->regs.cr1 & TIMX_CEN_TEST_VALUE))
-        reg_bitwise_write(dev->regs.cr1, CEN_MASK << CEN_SHIFT_BITS, CEN_ENABLE << CEN_SHIFT_BITS);
+    if (!(dev->regs->cr1 & TIMX_CEN_TEST_VALUE))
+        reg_bitwise_write(dev->regs->cr1, CEN_MASK << CEN_SHIFT_BITS, CEN_ENABLE << CEN_SHIFT_BITS);
 
     shift_bits = channel * DIER_CH_SHIFT_BITS + CCXIE_SHIFT_BITS;
-    reg_bitwise_write(dev->regs.dier, CCXIE_MASK << shift_bits, CCXIE_ENABLE << shift_bits);
+    reg_bitwise_write(dev->regs->dier, CCXIE_MASK << shift_bits, CCXIE_ENABLE << shift_bits);
     return 0;
 }
 
@@ -217,10 +221,10 @@ int timer_input_capture_disable(struct timer_device *dev, uint8_t channel)
     uint8_t shift_bits = 0;
 
     shift_bits = channel * DIER_CH_SHIFT_BITS + CCXIE_SHIFT_BITS;
-    reg_bitwise_write(dev->regs.dier, CCXIE_MASK << shift_bits, CCXIE_DISABLE << shift_bits);
+    reg_bitwise_write(dev->regs->dier, CCXIE_MASK << shift_bits, CCXIE_DISABLE << shift_bits);
 
-    if (!(dev->regs.cr1 & TIMX_CEN_TEST_VALUE))
-        reg_bitwise_write(dev->regs.cr1, CEN_MASK << CEN_SHIFT_BITS, CEN_ENABLE << CEN_SHIFT_BITS);
+    if (!(dev->regs->cr1 & TIMX_CEN_TEST_VALUE))
+        reg_bitwise_write(dev->regs->cr1, CEN_MASK << CEN_SHIFT_BITS, CEN_ENABLE << CEN_SHIFT_BITS);
 
     return 0;
 }
@@ -240,12 +244,12 @@ int timer_input_capture_init(struct timer_device *dev, uint8_t channel)
     ccmr_sel = channel > CHANNEL_2 ? 1 : 0;
     mask = ((ICXF_MASK << (shift_bits + ICXF_SHIFT_BITS)) | (ICXPSC_MASK << (shift_bits + ICXPSC_SHIFT_BITS)) | (CCXS_MASK << (shift_bits + CCXS_SHIFT_BITS)));
     value = ((ICXF_NO_FILTER << (shift_bits + ICXF_SHIFT_BITS)) | (ICXPSC_NO_PSC << (shift_bits + ICXPSC_SHIFT_BITS)) | (CCXS_DIRCT_INPUT << (shift_bits + CCXS_SHIFT_BITS)));
-    reg_bitwise_write(dev->regs.ccmr[ccmr_sel], mask, value);
+    reg_bitwise_write(dev->regs->ccmr[ccmr_sel], mask, value);
 
     shift_bits = channel * CCER_CH_SHIFT_BITS + CCXNP_SHIFT_BITS;
-    reg_bitwise_write(dev->regs.ccer, CCXNP_MASK << shift_bits, CCXP_BOTH_EDGE << shift_bits);
+    reg_bitwise_write(dev->regs->ccer, CCXNP_MASK << shift_bits, CCXP_BOTH_EDGE << shift_bits);
 
-    reg_bitwise_write(dev->regs.cr1, UDIS_MASK_MASK << UDIS_SHIFT_BITS, UDIS_DISABLE << UDIS_SHIFT_BITS);
+    reg_bitwise_write(dev->regs->cr1, UDIS_MASK_MASK << UDIS_SHIFT_BITS, UDIS_DISABLE << UDIS_SHIFT_BITS);
 
     if (dev->irq_enable)
         timer_init_irq(dev);
@@ -271,45 +275,5 @@ uint8_t get_timer_gpio_alter_mode(uint8_t timer_id)
 
 int timer_platform_init(void)
 {
-    uint8_t i = 0, j = 0;
-    struct timer_device *timer_dev = NULL;
-
-    for (i = 0; i < ARRAY_SIZE(support_timer_list); i++) {
-        timer_dev = &support_timer_list[i];
-        switch (timer_dev->id) {
-        case TIMER1:
-            timer_dev->reg_base = TIM1_BASE_REG;
-            break;
-        case TIMER2:
-            timer_dev->reg_base = TIM2_BASE_REG;
-            break;
-        case TIMER5:
-            timer_dev->reg_base = TIM5_BASE_REG;
-            break;
-        case TIMER8:
-            timer_dev->reg_base = TIM8_BASE_REG;
-            break;
-        default:
-            break;
-        }
-
-        timer_dev->regs.cr1 = timer_dev->reg_base + TIMX_CR1_OFFSET;
-        timer_dev->regs.cr2 = timer_dev->reg_base + TIMX_CR2_OFFSET;
-        timer_dev->regs.smcr = timer_dev->reg_base + TIMX_SMCR_OFFSET;
-        timer_dev->regs.dier = timer_dev->reg_base + TIMX_DIER_OFFSET;
-        timer_dev->regs.sr = timer_dev->reg_base + TIMX_SR_OFFSET;
-        timer_dev->regs.egr = timer_dev->reg_base + TIMX_EGR_OFFSET;
-        for (j = 0; j < CCMR_MAX; j++)
-            timer_dev->regs.ccmr[j] = timer_dev->reg_base + TIMX_CCMR1_OFFSET + j * TIMX_CCMR_CH_OFFSET;
-        timer_dev->regs.ccer = timer_dev->reg_base + TIMX_CCER_OFFSET;
-        timer_dev->regs.cnt = timer_dev->reg_base + TIMX_CNT_OFFSET;
-        timer_dev->regs.psc = timer_dev->reg_base + TIMX_PSC_OFFSET;
-        timer_dev->regs.arr = timer_dev->reg_base + TIMX_ARR_OFFSET;
-        for (j = 0; j < CCR_CHANNEL_MAX; j++)
-            timer_dev->regs.ccr[j] = timer_dev->reg_base + TIMX_CCR_OFFSET + j * TIMX_CCR_CH_OFFSET;
-        timer_dev->regs.dcr = timer_dev->reg_base + TIMX_DCR_OFFSET;
-        timer_dev->regs.dmar = timer_dev->reg_base + TIMX_DMAR_OFFSET;
-    }
-
     return 0;
 }
