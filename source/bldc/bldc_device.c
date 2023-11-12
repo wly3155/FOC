@@ -89,6 +89,15 @@ static struct bldc_device bldc_dev[MAX_DEV_NUM] = {
     },
 };
 
+static int bldc_update(uint8_t id)
+{
+    struct bldc_event event;
+
+    event.event_type = EVENT_UPDATE;
+    event.header.id = id;
+    return bldc_event_enqueue(&event);
+}
+
 static int bldc_set_phase_encoder(uint8_t bldc, uint8_t phase, uint8_t encoder)
 {
     struct bldc_device *dev = &bldc_dev[bldc];
@@ -251,6 +260,7 @@ static int bldc_device_pwm_init(uint8_t id, uint32_t freq_hz)
     return 0;
 }
 
+#ifdef CFG_BLDC_ZERO_CROSS_DETECTOR_SUPPORT
 static int bldc_device_zcd_irq_handler(void *private_data)
 {
     return bldc_update(ptr_to_bldc_id(private_data));
@@ -270,6 +280,7 @@ static int bldc_device_zcd_init(uint8_t id)
     irq_register(irq_num, bldc_device_zcd_irq_handler, (void *)irq_num);
     return 0;
 }
+#endif
 
 int bldc_device_init(void)
 {
@@ -286,7 +297,7 @@ int bldc_device_init(void)
         dev[id].status = STATUS_IDLE;
         dev[id].freq = BLDC_PWM_FREQ_HZ;
         bldc_device_pwm_init(id, BLDC_PWM_FREQ_HZ);
-		bldc_device_zcd_init(id);
+		//bldc_device_zcd_init(id);
     }
 
     return 0;

@@ -14,7 +14,7 @@
 #include <st/st_board.h>
 #include <st/st_usart.h>
 
-#define LOG_BUF_SIZE            256
+#define LOG_BUF_SIZE            2560
 
 static char log_buf[LOG_BUF_SIZE] = {'\0'};
 
