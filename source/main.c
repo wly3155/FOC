@@ -110,7 +110,7 @@
 
 #include "main.h"
 #include "irq.h"
-#include "log.h"
+#include "printf.h"
 #include "led.h"
 #include "bldc_init.h"
 #include "st/st_board.h"
@@ -119,11 +119,16 @@ int main(void)
 {
     /* Configure the hardware ready to run the test. */
     prvSetupHardware();
+    printf_init();
     irq_init();
-    log_init();
-    logi("********foc start*********\n");
+    pr_info("********foc start*********\n");
     led_init();
-    bldc_init();
+    //bldc_init();
+
+#ifdef CFG_FOC_TEST_TASK_SUPPORT
+    extern void test_task_init(void);
+    test_task_init();
+#endif
 
 #ifdef CFG_FOC_TEST_SUPPORT
     extern void test_init(void);
@@ -191,7 +196,7 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 
 void assert_failed(uint8_t* file, uint32_t line)
 {
-    loge("ASSERT at file:%s, line:%lu\n", file, line);
+    pr_err("ASSERT at file:%s, line:%lu\n", file, line);
     taskDISABLE_INTERRUPTS();
     for( ;; );
 }
