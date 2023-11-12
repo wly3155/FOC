@@ -16,7 +16,7 @@ enum BLDC_MODE {
 
 enum BLDC_EVENT {
     EVENT_PUBLIC_START = 0,
-    EVENT_UPDATE =     EVENT_PUBLIC_START,
+    EVENT_UPDATE = EVENT_PUBLIC_START,
     EVENT_DISABLE,
     EVENT_ENABLE,
     EVENT_CALIBRATE,
@@ -79,10 +79,15 @@ struct bldc_device_interface {
     int (*config)(struct bldc_event *);
 };
 
-int bldc_update(uint8_t id);
+/* BLDC Interface for Users */
 int bldc_enable(uint8_t id, float duty);
 int bldc_disble(uint8_t id);
+int bldc_config(uint8_t id, uint8_t cmd, void *data, uint8_t len);
+
 void bldc_manager_init(void);
+
+
+int bldc_event_enqueue(struct bldc_event *event);
 int bldc_manager_device_register(struct bldc_device_interface *interface);
 
 #ifdef __cplusplus
