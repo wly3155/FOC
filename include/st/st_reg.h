@@ -32,13 +32,25 @@ extern "c" {
 #define reg_readl(reg)                      (uint32_t)(*((volatile uint32_t *)(reg)))
 #define reg_writel(reg, val)                (*(volatile uint32_t *)(reg) = (uint32_t)(val))
 
+struct reg_debug {
+    uint32_t reg;
+    uint32_t value;
+};
+
+
+static struct reg_debug debug_old, debug_new;
 static inline uint32_t reg_bitwise_write(volatile uint32_t reg, uint32_t bitwise, uint32_t value)
 {
     uint32_t tmp = reg_readl(reg);
 
+    debug_old.reg = reg;
+    debug_old.value = tmp;
     tmp &= ~bitwise;
     tmp |= value;
     reg_writel(reg, tmp);
+
+    debug_new.reg = reg;
+    debug_new.value = reg_readl(reg);
     return tmp;
 }
 
