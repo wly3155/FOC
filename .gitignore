@@ -1,6 +1,8 @@
-# gitignore file
+# built generated files
 *.o
 *.log
+
+#source insight generated files
 *.IAB
 *.IAD
 *.IMB
@@ -12,5 +14,12 @@
 *.PS
 *.SearchResults
 *.WK3
+
+#gdb generated files
+gdb.history
+
+#project related files
 FOC_OUT/
 
+#vscode generated files
+.vscode/
