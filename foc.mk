@@ -3,7 +3,7 @@ include foc.config
 PROJECT=FOC
 FOC_DIR=.
 
-PROJECT_DIR=~/Documents/project
+PROJECT_DIR=~/project
 
 ifeq ($(CFG_STM32F405RGT6_SUPPORT),yes)
 C_FLAGS += -DUSE_FULL_ASSERT
@@ -44,6 +44,10 @@ FLASH_TOOL = $(FLASH_TOOL_DIR)/bin/st-flash
 FLASH_ADDR = 0x08000000
 FLASH_SIZE = 0x00100000
 GDB_SERVER = $(FLASH_TOOL_DIR)/bin/st-util
+
+JLINK_TOOLPATH = $(PROJECT_DIR)/JLink_Linux_V786g_x86_64
+JLINKEXE = $(JLINK_TOOLPATH)/JFlashExe
+JLINKSEVER = $(JLINK_TOOLPATH)/JLinkGDBServer
 
 OPENOCD_TOOL_DIR = /usr/local/bin
 OPENOCD_TOOL = $(OPENOCD_TOOL_DIR)/openocd
@@ -89,11 +93,11 @@ C_INCLUDES += -I$(FOC_DIR)/include/bldc
 C_FILES += $(FOC_DIR)/source/main.c
 C_FILES += $(FOC_DIR)/source/irq.c
 C_FILES += $(FOC_DIR)/source/led.c
-C_FILES += $(FOC_DIR)/source/log.c
+C_FILES += $(FOC_DIR)/source/printf.c
 LD_FLAGS += -Wl,--wrap,printf
-C_FILES += $(FOC_DIR)/source/bldc/bldc_manager.c
-C_FILES += $(FOC_DIR)/source/bldc/bldc_device.c
-C_FILES += $(FOC_DIR)/source/bldc/bldc_init.c
+#C_FILES += $(FOC_DIR)/source/bldc/bldc_manager.c
+#C_FILES += $(FOC_DIR)/source/bldc/bldc_device.c
+#C_FILES += $(FOC_DIR)/source/bldc/bldc_init.c
 endif
 
 ifeq ($(CFG_FOC_TEST_SUPPORT),yes)

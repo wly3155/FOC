@@ -27,7 +27,7 @@ struct bldc_manager {
 
 static struct bldc_manager bldc_mgr;
 
-static int bldc_event_enqueue(struct bldc_event *event)
+int bldc_event_enqueue(struct bldc_event *event)
 {
     int ret = 0;
     BaseType_t xHigherPriorityTaskWoken;
@@ -42,6 +42,48 @@ static int bldc_event_enqueue(struct bldc_event *event)
 
     configASSERT(ret);
     return ret;
+}
+
+int bldc_enable(uint8_t id, float duty)
+{
+    struct bldc_event event;
+
+    event.event_type = EVENT_ENABLE;
+    event.header.id = id;
+    event.ctrl.duty = duty;
+    return bldc_event_enqueue(&event);
+}
+
+int bldc_disble(uint8_t id)
+{
+    struct bldc_event event;
+
+    event.event_type = EVENT_DISABLE;
+    event.header.id = id;
+    event.ctrl.duty = 0;
+    return bldc_event_enqueue(&event);
+}
+
+int bldc_config(uint8_t id, uint8_t cmd, void *data, uint8_t len)
+{
+    struct bldc_event event;
+
+    event.event_type = EVENT_CONFIG;
+    event.header.id = id;
+    event.cfg.cmd = cmd;
+    memcpy(event.cfg.data, data, min(sizeof(event.cfg.data), len));
+    return bldc_event_enqueue(&event);
+}
+
+int bldc_manager_device_register(struct bldc_device_interface *interface)
+{
+    struct bldc_manager *mgr = &bldc_mgr;
+
+    if (mgr->dev_interface)
+        return -EEXIST;
+
+    mgr->dev_interface = interface;
+    return 0;
 }
 
 static int bldc_handle_event(struct bldc_manager *mgr, struct bldc_event *event)
@@ -89,57 +131,6 @@ static void bldc_task(void *param)
 
         bldc_handle_event(mgr, &event);
     }
-}
-
-int bldc_update(uint8_t id)
-{
-    struct bldc_event event;
-
-    event.event_type = EVENT_UPDATE;
-    event.header.id = id;
-    return bldc_event_enqueue(&event);
-}
-
-int bldc_enable(uint8_t id, float duty)
-{
-    struct bldc_event event;
-
-    event.event_type = EVENT_ENABLE;
-    event.header.id = id;
-    event.ctrl.duty = duty;
-    return bldc_event_enqueue(&event);
-}
-
-int bldc_disble(uint8_t id)
-{
-    struct bldc_event event;
-
-    event.event_type = EVENT_DISABLE;
-    event.header.id = id;
-    event.ctrl.duty = 0;
-    return bldc_event_enqueue(&event);
-}
-
-int bldc_config(uint8_t id, uint8_t cmd, void *data, uint8_t len)
-{
-    struct bldc_event event;
-
-    event.event_type = EVENT_CONFIG;
-    event.header.id = id;
-    event.cfg.cmd = cmd;
-    memcpy(event.cfg.data, data, min(sizeof(event.cfg.data), len));
-    return bldc_event_enqueue(&event);
-}
-
-int bldc_manager_device_register(struct bldc_device_interface *interface)
-{
-    struct bldc_manager *mgr = &bldc_mgr;
-
-    if (mgr->dev_interface)
-        return -EEXIST;
-
-    mgr->dev_interface = interface;
-    return 0;
 }
 
 void bldc_manager_init(void)

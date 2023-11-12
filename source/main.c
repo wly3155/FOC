@@ -123,7 +123,7 @@ int main(void)
     log_init();
     logi("********foc start*********\n");
     led_init();
-    bldc_init();
+    //bldc_init();
 
 #ifdef CFG_FOC_TEST_SUPPORT
     extern void test_init(void);

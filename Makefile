@@ -68,4 +68,12 @@ gdb:
 #From GDB, connect to the server using:
 #(gdb) target extended localhost:4242
 
+JLINK_PROJ = download.jflash
+jlnk_download:
+	$(JLINKEXE) -openprj $(JLINK_PROJ) -open $(OUTPUT_DIR)/$(TARGET).hex -auto -exit
+
+jlink_sever:
+	$(JLINKSEVER) -select USB -device STM32F405RG -endian little -if SWD -speed 4000 -noir -noLocalhostOnly -nologtofile -port 2331 -SWOPort 2332 -TelnetPort 2333
+
+
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
