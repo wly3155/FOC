@@ -1,7 +1,7 @@
 /*
  * This file is licensed under the Apache License, Version 2.0.
  *
- * Copyright (c) 2023 wuliyong3155@163.com
+ * Copyright (c) 2024 wuliyong3155@163.com
  *
  * A copy of the license can be obtained at: http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,25 +13,21 @@
  *
  */
 
-#ifndef __ST_IRQ_H__
-#define __ST_IRQ_H__
+#include "printf.h"
+#include "sec_defs.h"
 
-#include <stdbool.h>
 #include "stm32f4xx.h"
+#include "stm32f4xx_adc.h"
+#include "stm32f4xx_dma.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+volatile ADC_TypeDef *const dbg_adc1 = ADC1;
+volatile DMA_TypeDef *const dbg_dma2 = DMA2;
+volatile DMA_Stream_TypeDef *const dbg_dma2_stream0 = DMA2_Stream0;
 
-bool is_in_isr(void);
-void irq_enable(void);
-void irq_disable(void);
-void irq_register(uint8_t irq_num,
-        int(*irq_handler)(void *private_data), void *private_data);
-void irq_init(void);
-
-#ifdef __cplusplus
+int debug_init(void)
+{
+        pr_info("dbg_adc1 %p\n", dbg_adc1);
+        pr_info("dbg_dma2 %p\n", dbg_dma2);
+        pr_info("dbg_dma2_stream0 %p\n", dbg_dma2_stream0);
+        return 0;
 }
-#endif
-#endif
-
