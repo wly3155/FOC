@@ -25,24 +25,24 @@ extern "C" {
 #endif
 
 enum step_status {
-    STATUS_A,
-    STATUS_B,
-    STATUS_C,
-    STATUS_D,
-    STATUS_E,
-    STATUS_F,
+	STATUS_A,
+	STATUS_B,
+	STATUS_C,
+	STATUS_D,
+	STATUS_E,
+	STATUS_F,
 };
 
 struct bldc_step_fsm {
-    uint8_t status;
-    int status_func(void *private_data);
+	uint8_t status;
+	int status_func(void *private_data);
 };
 
 enum phase_encoder {
-    encoder_idle,
-    encoder_low,
-    encoder_high,
-    encoder_pwm,
+	encoder_idle,
+	encoder_low,
+	encoder_high,
+	encoder_pwm,
 };
 
 int bldc_device_init(void);

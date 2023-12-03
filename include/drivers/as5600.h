@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2023>  <wuliyong3155@163.com>
+ * Copyright (C) <2024>  <wuliyong3155@163.com>
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __ST_TIME_H__
-#define __ST_TIME_H__
-
-#include "utils.h"
+#ifndef __AS5600_H__
+#define __AS5600_H__
 
 #ifdef __cplusplus
 extern "c" {
 #endif
 
-void udelay(uint32_t delay_us);
-#define mdelay(x) udelay(ms_to_us(x))
-uint64_t get_boot_time_ns(void);
-int time_platform_init(void);
 
 #ifdef __cplusplus
 }

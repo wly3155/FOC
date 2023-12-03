@@ -113,8 +113,12 @@
 #include "led.h"
 #include "bldc_init.h"
 
+#include "st/adc.h"
+#include "st/debug.h"
+#include "st/flash.h"
 #include "st/exception.h"
 #include "st/irq.h"
+#include "st/pwm.h"
 #include "st/st_board.h"
 #include "st/time.h"
 
@@ -135,6 +139,10 @@ int main(void)
 	pr_info("********foc start*********\n");
 	led_init();
 	//bldc_init();
+	pwm_platform_init();
+	adc_platform_init();
+	flash_platform_init();
+	debug_init();
 
 	test_task_init();
 
