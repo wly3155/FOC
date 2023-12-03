@@ -13,25 +13,19 @@
  *
  */
 
-#ifndef __ST_IRQ_H__
-#define __ST_IRQ_H__
+#ifndef __ST_EINT_H__
+#define __ST_EINT_H__
 
-#include <stdbool.h>
-#include "stm32f4xx.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool is_in_isr(void);
-void irq_enable(void);
-void irq_disable(void);
-void irq_register(uint8_t irq_num,
-        int(*irq_handler)(void *private_data), void *private_data);
-void irq_init(void);
+int eint_get_last_status(uint8_t eint_num);
+int eint_platform_init(void);
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-
