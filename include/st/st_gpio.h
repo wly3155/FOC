@@ -1,7 +1,3 @@
-
-#ifndef __ST_GPIO_H__
-#define __ST_GPIO_H__
-
 /*
  * Copyright (C) <2022>  <wuliyong3155@163.com>
 
@@ -18,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#ifndef __ST_GPIO_H__
+#define __ST_GPIO_H__
 
 #include <stdint.h>
 #include <st/st_board.h>

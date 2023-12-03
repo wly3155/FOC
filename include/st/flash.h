@@ -13,25 +13,23 @@
  *
  */
 
-#ifndef __ST_IRQ_H__
-#define __ST_IRQ_H__
+#ifndef __ST_FLASH_H__
+#define __ST_FLASH_H__
 
-#include <stdbool.h>
-#include "stm32f4xx.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool is_in_isr(void);
-void irq_enable(void);
-void irq_disable(void);
-void irq_register(uint8_t irq_num,
-        int(*irq_handler)(void *private_data), void *private_data);
-void irq_init(void);
+int flash_wrapper_write_byte(void *addr, uint8_t value);
+int flash_wrapper_write_halfword(void *addr, uint16_t value);
+int flash_wrapper_write_word(void *addr, uint32_t value);
+
+void *flash_wrapper_malloc(uint32_t size);
+int flash_wrapper_init(void);
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-
