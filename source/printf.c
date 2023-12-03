@@ -46,12 +46,14 @@ static void printf_buffer_ring_write(struct printf_buffer *pb, char *data)
 {
 	uint8_t first = 0, second = 0;
 
+	taskDISABLE_INTERRUPTS();
 	first = min(strlen(data), pb->size - pb->wp);
 	second = strlen(data) - first;
 	memcpy(pb->buffer + pb->wp, data, first);
 	memcpy(pb->buffer, data + first, second);
 	pb->wp += strlen(data);
 	pb->wp &= (pb->size - 1);
+	taskENABLE_INTERRUPTS();
 }
 
 static int printf_header_format(struct printf_buffer *pb)
@@ -59,7 +61,7 @@ static int printf_header_format(struct printf_buffer *pb)
 	char timestamp[16] = {0};
 	uint64_t now = get_boot_time_ns();
 	uint32_t sec = now / 1000000000;
-	uint32_t mini_sec = (uint64_t)(now % 1000000000) / 1000000;
+	uint32_t mini_sec = (uint32_t)(now / 1000000 % 1000);
 
 	snprintf(timestamp, sizeof(timestamp), "[%lu.%03lu] ", sec, mini_sec);
 	printf_buffer_ring_write(pb, timestamp);
@@ -105,6 +107,10 @@ int printf_init()
 	memset(pb->buffer, 0x00, sizeof(pb->buffer));
 #ifdef CFG_USART_SUPPORT
 	usart_printf_init();
+#endif
+
+#ifdef CFG_SEGGER_RTT_SUPPORT
+        SEGGER_RTT_Init();
 #endif
 	return 0;
 }
