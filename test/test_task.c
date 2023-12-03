@@ -21,17 +21,20 @@
 static void test_task_func(void *param)
 {
 	static uint8_t count = 0;
+	uint8_t task_id = (uint8_t)(uint32_t)param;
 
 	while (1) {
 		vTaskDelay(pdMS_TO_TICKS(1000));
-		pr_info("%s runs @%u\n", __func__, count++);
+		pr_info("[%u] %s runs @%u\n", task_id, __func__, count++);
 	}
 }
 
 void test_task_init(void)
 {
-#define config_TEST_TASK_STACK_SIZE 1024
+#define config_TEST_TASK_STACK_SIZE 512
 #define config_TEST_TASK_PRI (configMAX_PRIORITIES - 3)
-	xTaskCreate(test_task_func, "test_task", config_TEST_TASK_STACK_SIZE,
-		( void * ) NULL, config_TEST_TASK_PRI, NULL);
+	xTaskCreate(test_task_func, "test_task1", config_TEST_TASK_STACK_SIZE,
+		( void * ) 1, config_TEST_TASK_PRI, NULL);
+	xTaskCreate(test_task_func, "test_task2", config_TEST_TASK_STACK_SIZE,
+		( void * ) 2, config_TEST_TASK_PRI, NULL);
 }
