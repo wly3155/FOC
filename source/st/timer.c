@@ -38,15 +38,15 @@ static int timer_irq_handler(void *private_data)
 	if (timer_dev->handler)
 		timer_dev->handler(timer_dev->private_data);
 
-	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET) {
-		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) {
+		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 	}
 	return 0;
 }
 
 int timer_enable(struct timer_device *dev, bool enable)
 {
-	TIM_Cmd(TIM3, enable);
+	TIM_Cmd(TIM4, enable);
         return 0;
 }
 
@@ -55,17 +55,17 @@ static int timer_init(uint32_t period_ns)
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 
 	configASSERT(period_ns <= TIME_MAX_PERIOD);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-	TIM_InternalClockConfig(TIM3);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+	TIM_InternalClockConfig(TIM4);
 	TIM_TimeBaseStructure.TIM_Period = period_ns / TIME_BASE_NS - 1;
 	TIM_TimeBaseStructure.TIM_Prescaler = configAPB1_TIM_CLOCK_HZ / TIME_BASE_FREQ_HZ - 1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
-	//TIM_SelectOutputTrigger(TIM3, TIM_TRGOSource_Update);
-	TIM_ClearFlag(TIM3, TIM_FLAG_Update);
-	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-	irq_register(TIM3_IRQn, timer_irq_handler, NULL);
+	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
+	//TIM_SelectOutputTrigger(TIM4, TIM_TRGOSource_Update);
+	TIM_ClearFlag(TIM4, TIM_FLAG_Update);
+	TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
+	irq_register(TIM4_IRQn, timer_irq_handler, NULL);
 	return 0;
 }
 

@@ -1,0 +1,7 @@
+STM32F405 Resource Usage:
+tim1: bldc0
+tim2: timestamp
+tim3: adc tigger
+tim4: user timer0
+tim5: timestamp
+tim8: bldc1
