@@ -126,6 +126,9 @@ __attribute__((weak)) void test_task_init(void)
 	}
 }
 
+#include "st/adc_wrapper.h"
+#include "st/flash_wrapper.h"
+
 int main(void)
 {
 	/* Configure the hardware ready to run the test. */
@@ -135,6 +138,9 @@ int main(void)
 	pr_info("********foc start*********\n");
 	led_init();
 	//bldc_init();
+
+	//adc_wrapper_init();
+	flash_wrapper_init();
 
 	test_task_init();
 
