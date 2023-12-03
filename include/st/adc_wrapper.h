@@ -13,25 +13,22 @@
  *
  */
 
-#ifndef __ST_IRQ_H__
-#define __ST_IRQ_H__
+#ifndef __ADC_WRAPPER_H__
+#define __ADC_WRAPPER_H__
 
-#include <stdbool.h>
-#include "stm32f4xx.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool is_in_isr(void);
-void irq_enable(void);
-void irq_disable(void);
-void irq_register(uint8_t irq_num,
-        int(*irq_handler)(void *private_data), void *private_data);
-void irq_init(void);
+#define MAX_ADC_NUM			(3)
+#define MAX_CHAN_PRE_ADC		(6)
+
+uint16_t adc_wrapper_get_value(uint8_t adc, uint8_t chan);
+int adc_wrapper_init(void);
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-

@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef __ST_IRQ_H__
-#define __ST_IRQ_H__
+#ifndef __PWM_WRAPPER_H__
+#define __PWM_WRAPPER_H__
 
 #include <stdbool.h>
 #include "stm32f4xx.h"
@@ -23,15 +23,25 @@
 extern "C" {
 #endif
 
-bool is_in_isr(void);
-void irq_enable(void);
-void irq_disable(void);
-void irq_register(uint8_t irq_num,
-        int(*irq_handler)(void *private_data), void *private_data);
-void irq_init(void);
+enum {
+        PWM_GROUP0,
+        PWM_GROUP1,
+        MAX_PWM_GROUP,
+};
+
+enum {
+        PWM_CHAN0,
+        PWM_CHAN1,
+        PWM_CHAN2,
+        MAX_PWM_CHAN,
+};
+
+int pwm_wrapper_channel_enable(uint8_t group, uint8_t channel, bool enable);
+int pwm_wrapper_group_enable(uint8_t group, bool enable);
+int pwm_wrapper_set_duty(uint8_t group, float duty);
+int pwm_wrapper_init(void);
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-
