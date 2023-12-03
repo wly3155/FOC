@@ -23,17 +23,17 @@ extern "c" {
 #endif
 
 enum phase {
-    PHASE_A,
-    PHASE_B,
-    PHASE_C,
-    PHASE_MAX,
+	PHASE_A,
+	PHASE_B,
+	PHASE_C,
+	PHASE_MAX,
 };
 
 enum phase_encoder {
-    encoder_idle,
-    encoder_low,
-    encoder_high,
-    encoder_pwm,
+	encoder_idle,
+	encoder_low,
+	encoder_high,
+	encoder_pwm,
 };
 
 int bldc_device_init(void);

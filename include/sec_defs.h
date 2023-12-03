@@ -1,7 +1,7 @@
 /*
  * This file is licensed under the Apache License, Version 2.0.
  *
- * Copyright (c) 2023 wuliyong3155@163.com
+ * Copyright (c) 2024 wuliyong3155@163.com
  *
  * A copy of the license can be obtained at: http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,25 +13,20 @@
  *
  */
 
-#ifndef __ST_IRQ_H__
-#define __ST_IRQ_H__
+#ifndef __SEC_DEFS_H__
+#define __SEC_DEFS_H__
 
-#include <stdbool.h>
-#include "stm32f4xx.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "c" {
 #endif
 
-bool is_in_isr(void);
-void irq_enable(void);
-void irq_disable(void);
-void irq_register(uint8_t irq_num,
-        int(*irq_handler)(void *private_data), void *private_data);
-void irq_init(void);
+#define UNUSED			__attribute__((unused))
+#define USED			__attribute__((used))
+#define RO_DEBUG			__attribute__((section (".ro_debug")))
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-
