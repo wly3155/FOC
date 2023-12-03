@@ -28,5 +28,5 @@ uint64_t get_boot_time_ns(void)
         tick = xTaskGetTickCount();
 
     tick_count = get_curr_systick_count();
-    return ms_to_ns(tick_to_ms(tick)) + tick_count * configSYSTICK_CLOCK_NS;
+    return ms_to_ns(tick_to_ms(tick)) + tick_count * configSYSTICK_CLOCK_NS;;
 }

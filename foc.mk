@@ -26,12 +26,16 @@ C_INCLUDES += -I$(STM32_CMSIS_DIR)/Device/ST/STM32F4xx/Include
 ASM_FILES += $(STM32_CMSIS_DIR)/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f40_41xxx.s
 
 C_INCLUDES += -I$(STM32_PERIPH_DIR)/inc
-C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_syscfg.c
-C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_rcc.c
+
+C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_adc.c
 C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_exti.c
+C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_flash.c
 C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_gpio.c
+C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_rcc.c
+C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_syscfg.c
 C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_tim.c
 C_FILES += $(STM32_PERIPH_DIR)/src/stm32f4xx_usart.c
+
 C_FILES += $(STM32_PERIPH_DIR)/src/misc.c
 
 C_INCLUDES += -I$(STM32_TEMPLATES_DIR)
@@ -75,12 +79,15 @@ ifeq ($(CFG_ST_BOARD_SUPPORT),yes)
 C_FLAGS += -DCFG_ST_BOARD_SUPPORT
 C_INCLUDES += -I$(FOC_DIR)/include
 C_FILES += $(FOC_DIR)/source/arm/time.c
+C_FILES += $(FOC_DIR)/source/st/adc_wrapper.c
+C_FILES += $(FOC_DIR)/source/st/flash_wrapper.c
 C_FILES += $(FOC_DIR)/source/st/st_board.c
-C_FILES += $(FOC_DIR)/source/st/st_gpio.c
-C_FILES += $(FOC_DIR)/source/st/st_timer.c
-C_FILES += $(FOC_DIR)/source/st/st_pwm.c
-C_FILES += $(FOC_DIR)/source/st/st_input_capture.c
-C_FILES += $(FOC_DIR)/source/st/st_exti.c
+#C_FILES += $(FOC_DIR)/source/st/st_gpio.c
+#C_FILES += $(FOC_DIR)/source/st/st_timer.c
+#C_FILES += $(FOC_DIR)/source/st/st_pwm.c
+#C_FILES += $(FOC_DIR)/source/st/st_input_capture.c
+#C_FILES += $(FOC_DIR)/source/st/st_exti.c
+C_FILES += $(FOC_DIR)/source/st/pwm_wrapper.c
 ifeq ($(CFG_USART_SUPPORT),yes)
 C_FLAGS += -DCFG_USART_SUPPORT
 C_FILES += $(FOC_DIR)/source/st/st_usart.c
@@ -90,9 +97,10 @@ endif
 ifeq ($(CFG_FOC_SUPPORT),yes)
 C_FLAGS += -DCFG_FOC_SUPPORT
 C_INCLUDES += -I$(FOC_DIR)/include/bldc
+C_FILES += $(FOC_DIR)/source/execption.c
 C_FILES += $(FOC_DIR)/source/main.c
 C_FILES += $(FOC_DIR)/source/irq.c
-C_FILES += $(FOC_DIR)/source/led.c
+#C_FILES += $(FOC_DIR)/source/led.c
 C_FILES += $(FOC_DIR)/source/printf.c
 LD_FLAGS += -Wl,--wrap,printf
 #C_FILES += $(FOC_DIR)/source/bldc/bldc_manager.c
@@ -111,8 +119,11 @@ endif
 ifeq ($(CFG_FOC_TEST_SUPPORT),yes)
 C_FLAGS += -DCFG_FOC_TEST_SUPPORT
 #C_FILES += $(FOC_DIR)/test/test_timer.c
-C_FILES += $(FOC_DIR)/test/test_bldc.c
+#C_FILES += $(FOC_DIR)/test/test_bldc.c
 endif
+
+C_FILES += $(FOC_DIR)/test/test_pwm.c
+C_FILES += $(FOC_DIR)/test/test_adc.c
 
 ifeq ($(CFG_FOC_TEST_TASK_SUPPORT),yes)
 C_FLAGS += -DCFG_FOC_TEST_TASK_SUPPORT

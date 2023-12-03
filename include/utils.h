@@ -13,7 +13,7 @@ extern "c" {
 #define min(x, y)                           (x < y ? x : y)
 #define tick_to_ms(tick)                    ((uint64_t)tick * configTICK_RATE_HZ / 1000)
 
-#define ms_to_ns(time)                      ((uint64_t)time * 1000000)
+#define ms_to_ns(time)                      ((uint64_t)time * 1000000ULL)
 #define ARRAY_SIZE(arr)                     (sizeof(arr) / sizeof(arr[0]))
 
 #define fatal(x)                            configASSERT(x)

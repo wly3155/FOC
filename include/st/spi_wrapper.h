@@ -13,25 +13,20 @@
  *
  */
 
-#ifndef __IRQ_H__
-#define __IRQ_H__
+#ifndef __SPI_WRAPPER_H__
+#define __SPI_WRAPPER_H__
 
-#include <stdbool.h>
-#include "stm32f4xx.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool is_in_isr(void);
-void irq_enable(void);
-void irq_disable(void);
-void irq_register(uint8_t irq_num,
-        int(*irq_handler)(void *private_data), void *private_data);
-void irq_init(void);
+int spi_wrapper_write(uint8_t spi_id, uint8_t data);
+int spi_wrapper_read(uint8_t spi_id, uint8_t **data);
+int spi_wrapper_init(void);
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-

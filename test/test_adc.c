@@ -16,25 +16,30 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include <inttypes.h>
 #include "printf.h"
 
-static void test_task_func(void *param)
+#include "st/adc_wrapper.h"
+
+static void test_adc_task(void *param)
 {
-	static uint8_t count = 0;
-	uint8_t task_id = (uint8_t)(uint32_t)param;
+	//uint8_t adc = 0, chan = 0;
+	static uint32_t count = 0;
 
 	while (1) {
-		vTaskDelay(pdMS_TO_TICKS(1000));
-		pr_info("[%u] %s runs @%u\n", task_id, __func__, count++);
+		//for (adc = 0; adc < MAX_ADC_NUM; adc++) {
+			//for (chan = 0; chan < MAX_CHAN_PRE_ADC; chan++)
+				////pr_info("get adc %u chan %u: %u\n",
+				////	adc, chan, adc_wrapper_get_value(adc, chan));
+		//}
+		vTaskDelay(999);
+		pr_info("test adc run@%" PRIu32 "tick %" PRIu32 "\n", count++, xTaskGetTickCount());
 	}
 }
 
-void test_task_init(void)
+void test_adc_init(void)
 {
 #define config_TEST_TASK_STACK_SIZE 512
 #define config_TEST_TASK_PRI (configMAX_PRIORITIES - 3)
-	xTaskCreate(test_task_func, "test_task1", config_TEST_TASK_STACK_SIZE,
-		( void * ) 1, config_TEST_TASK_PRI, NULL);
-	xTaskCreate(test_task_func, "test_task2", config_TEST_TASK_STACK_SIZE,
-		( void * ) 2, config_TEST_TASK_PRI, NULL);
+	xTaskCreate(test_adc_task, "test_adc", config_TEST_TASK_STACK_SIZE, ( void * ) NULL, config_TEST_TASK_PRI, NULL);
 }
