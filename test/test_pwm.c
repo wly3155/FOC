@@ -16,25 +16,23 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "printf.h"
+#include "st/pwm_wrapper.h"
 
-static void test_task_func(void *param)
+static void test_pwm_task(void *param)
 {
-	static uint8_t count = 0;
-	uint8_t task_id = (uint8_t)(uint32_t)param;
-
+	pwm_wrapper_set_duty(PWM_GROUP0, 0.5);
+	pwm_wrapper_group_enable(PWM_GROUP0, true);
+	pwm_wrapper_channel_enable(PWM_GROUP0, PWM_CHAN0, true);
+	pwm_wrapper_channel_enable(PWM_GROUP0, PWM_CHAN1, true);
+	pwm_wrapper_channel_enable(PWM_GROUP0, PWM_CHAN2, true);
 	while (1) {
-		vTaskDelay(pdMS_TO_TICKS(1000));
-		pr_info("[%u] %s runs @%u\n", task_id, __func__, count++);
+		vTaskDelay(1000);
 	}
 }
 
-void test_task_init(void)
+void test_pwm_init(void)
 {
 #define config_TEST_TASK_STACK_SIZE 512
 #define config_TEST_TASK_PRI (configMAX_PRIORITIES - 3)
-	xTaskCreate(test_task_func, "test_task1", config_TEST_TASK_STACK_SIZE,
-		( void * ) 1, config_TEST_TASK_PRI, NULL);
-	xTaskCreate(test_task_func, "test_task2", config_TEST_TASK_STACK_SIZE,
-		( void * ) 2, config_TEST_TASK_PRI, NULL);
+	xTaskCreate(test_pwm_task, "test_pwm", config_TEST_TASK_STACK_SIZE, ( void * ) NULL, config_TEST_TASK_PRI, NULL);
 }

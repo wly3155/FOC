@@ -70,7 +70,7 @@ gdb:
 
 JLINK_PROJ = download.jflash
 jlink_download:
-	$(JLINKEXE) -openprj $(JLINK_PROJ) -open $(OUTPUT_DIR)/$(TARGET).hex -auto -exit
+	$(JLINKEXE) -openprj $(JLINK_PROJ) -open $(OUTPUT_DIR)/$(TARGET).bin -erasechip -auto -startapp -exit
 
 jlink_sever:
 	$(JLINKSEVER) -select USB -device STM32F405RG -endian little -if SWD -speed 4000 -noir -noLocalhostOnly -nologtofile -port 2331 -SWOPort 2332 -TelnetPort 2333
