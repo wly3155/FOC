@@ -15,26 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "CM4/SCB.h"
-#include "st/st_board.h"
-#include "st/st_gpio.h"
-#include "st/st_reg.h"
-#include "st/time.h"
-#include "st/st_timer.h"
+#ifndef __ST_TIME_H__
+#define __ST_TIME_H__
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_conf.h"
+#ifdef __cplusplus
+extern "c" {
+#endif
 
-void prvSetupHardware(void)
-{
-    /* Setup STM32 system (clock, PLL and Flash configuration) */
-    SystemInit();
+uint64_t get_boot_time_ns(void);
+int time_platform_init(void);
 
-    /* Ensure all priority bits are assigned as preemption priority bits. */
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-    reg_bitwise_write(SCB_SHCSR_ADDR, 7<<16, 7<<16);
-    reg_bitwise_write(SCB_CCR_ADDR, 1<<4, 1<<4);
-    gpio_platform_init();
-    time_platform_init();
-    //timer_platform_init();
+#ifdef __cplusplus
 }
+#endif
+#endif
