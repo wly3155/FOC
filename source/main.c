@@ -131,12 +131,12 @@ int main(void)
 #endif
 
 #ifdef CFG_FOC_TEST_SUPPORT
-    extern void test_init(void);
-    test_init();
+    extern void test_timer_init(void);
+    test_timer_init();
 #endif
 
     /* Start the scheduler. */
-    vTaskStartScheduler();
+    //vTaskStartScheduler();
 
     /* If all is well, the scheduler will now be running, and the following line
     will never be reached.  If the following line does execute, then there was

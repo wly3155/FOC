@@ -81,6 +81,8 @@ C_FILES += $(FOC_DIR)/source/st/st_timer.c
 C_FILES += $(FOC_DIR)/source/st/st_pwm.c
 C_FILES += $(FOC_DIR)/source/st/st_input_capture.c
 C_FILES += $(FOC_DIR)/source/st/st_exti.c
+
+C_FILES += $(FOC_DIR)/source/st/timer_wrapper.c
 ifeq ($(CFG_USART_SUPPORT),yes)
 C_FLAGS += -DCFG_USART_SUPPORT
 C_FILES += $(FOC_DIR)/source/st/st_usart.c
@@ -110,8 +112,8 @@ endif
 
 ifeq ($(CFG_FOC_TEST_SUPPORT),yes)
 C_FLAGS += -DCFG_FOC_TEST_SUPPORT
-#C_FILES += $(FOC_DIR)/test/test_timer.c
-C_FILES += $(FOC_DIR)/test/test_bldc.c
+C_FILES += $(FOC_DIR)/test/test_timer.c
+#C_FILES += $(FOC_DIR)/test/test_bldc.c
 endif
 
 ifeq ($(CFG_FOC_TEST_TASK_SUPPORT),yes)

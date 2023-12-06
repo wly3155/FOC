@@ -5,6 +5,7 @@
 #include "task.h"
 #include "timers.h"
 #include "semphr.h"
+#include "misc.h"
 
 #include "log.h"
 #include "irq.h"
@@ -37,6 +38,7 @@ void irq_dispatch(void)
     struct irq_device *dev = NULL;
 
     __asm volatile ("mrs %0, ipsr" : "=r"(irq_num));
+    logi("%s %lu\n", __func__, irq_num);
     irq_num -= IRQ_EXCEPTION_TOTAL_NUM;
     dev = &support_irq_list[irq_num];
     configASSERT(dev->irq_handler);
@@ -45,10 +47,17 @@ void irq_dispatch(void)
 
 void irq_register(uint8_t irq_num, int (*irq_handler)(void *private_data), void *private_data)
 {
-    configASSERT(irq_num < MAX_IRQ_NUM);
+	NVIC_InitTypeDef nvic;
 
-    support_irq_list[irq_num].irq_handler = irq_handler;
-    support_irq_list[irq_num].private_data = private_data;
+	configASSERT(irq_num < MAX_IRQ_NUM);
+	support_irq_list[irq_num].irq_handler = irq_handler;
+	support_irq_list[irq_num].private_data = private_data;
+	nvic.NVIC_IRQChannel = irq_num;
+	nvic.NVIC_IRQChannelCmd = ENABLE;
+	nvic.NVIC_IRQChannelPreemptionPriority = 0;
+	nvic.NVIC_IRQChannelSubPriority = 1;
+	NVIC_Init(&nvic);
+	logi("%s irq %u handler:%p\n", __func__, irq_num, support_irq_list[irq_num].irq_handler);
 }
 
 __weak void SVC_Handler(void)
