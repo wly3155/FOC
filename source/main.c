@@ -109,10 +109,12 @@
 #include "semphr.h"
 
 #include "main.h"
-#include "irq.h"
 #include "printf.h"
 #include "led.h"
 #include "bldc_init.h"
+
+#include "st/exception.h"
+#include "st/irq.h"
 #include "st/st_board.h"
 
 int main(void)
@@ -125,14 +127,9 @@ int main(void)
     led_init();
     //bldc_init();
 
-#ifdef CFG_FOC_TEST_TASK_SUPPORT
+#ifdef CFG_FOC_TEST_SUPPORT
     extern void test_task_init(void);
     test_task_init();
-#endif
-
-#ifdef CFG_FOC_TEST_SUPPORT
-    extern void test_init(void);
-    test_init();
 #endif
 
     /* Start the scheduler. */
@@ -197,6 +194,7 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 void assert_failed(uint8_t* file, uint32_t line)
 {
     pr_err("ASSERT at file:%s, line:%lu\n", file, line);
+    stack_dump();
     taskDISABLE_INTERRUPTS();
     for( ;; );
 }
