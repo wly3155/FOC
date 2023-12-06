@@ -79,7 +79,7 @@ int __wrap_printf(const char *fmt, ...)
 	char buf[PRINTF_MAX_PRE_LINE] = {0};
 	va_list args;
 
-	taskDISABLE_INTERRUPTS();
+	//taskDISABLE_INTERRUPTS();
 	printf_header_format(pb);
 	va_start(args, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, args);
@@ -92,7 +92,7 @@ int __wrap_printf(const char *fmt, ...)
         SEGGER_RTT_WriteString(0, buf);
 #endif
 	va_end(args);
-	taskENABLE_INTERRUPTS();
+	//taskENABLE_INTERRUPTS();
 	return 0;
 }
 

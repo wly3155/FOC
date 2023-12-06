@@ -54,6 +54,12 @@ static inline uint32_t reg_bitwise_write(volatile uint32_t reg, uint32_t bitwise
     return tmp;
 }
 
+#define SCB_BASE_ADDR				(0xE000ED00)
+#define SCB_ACTLR_ADDR				(0xE000E008)
+#define SCB_CPUID_ADDR				(SCB_BASE_ADDR + 0x00)
+#define SCB_SHCSR_ADDR				(SCB_BASE_ADDR + 0x24)
+#define SCB_CFSR_ADDR				(SCB_BASE_ADDR + 0x28)
+
 /* stm32f405 gpio registers */
 #define GPIO_BASE_REG                       (0x40020000)
 #define GPIOx_GROUP_BASE_OFFSET             (0x400)
