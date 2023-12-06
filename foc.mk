@@ -74,13 +74,17 @@ endif
 ifeq ($(CFG_ST_BOARD_SUPPORT),yes)
 C_FLAGS += -DCFG_ST_BOARD_SUPPORT
 C_INCLUDES += -I$(FOC_DIR)/include
-C_FILES += $(FOC_DIR)/source/arm/time.c
+#C_FILES += $(FOC_DIR)/source/arm/time.c
+C_FILES += $(FOC_DIR)/source/st/irq.c
+C_FILES += $(FOC_DIR)/source/st/exception.c
+C_FILES += $(FOC_DIR)/source/st/time.c
+C_FILES += $(FOC_DIR)/source/st/timer.c
 C_FILES += $(FOC_DIR)/source/st/st_board.c
 C_FILES += $(FOC_DIR)/source/st/st_gpio.c
-C_FILES += $(FOC_DIR)/source/st/st_timer.c
 C_FILES += $(FOC_DIR)/source/st/st_pwm.c
 C_FILES += $(FOC_DIR)/source/st/st_input_capture.c
 C_FILES += $(FOC_DIR)/source/st/st_exti.c
+
 ifeq ($(CFG_USART_SUPPORT),yes)
 C_FLAGS += -DCFG_USART_SUPPORT
 C_FILES += $(FOC_DIR)/source/st/st_usart.c
@@ -90,10 +94,15 @@ endif
 ifeq ($(CFG_FOC_SUPPORT),yes)
 C_FLAGS += -DCFG_FOC_SUPPORT
 C_INCLUDES += -I$(FOC_DIR)/include/bldc
+
 C_FILES += $(FOC_DIR)/source/main.c
-C_FILES += $(FOC_DIR)/source/irq.c
 C_FILES += $(FOC_DIR)/source/led.c
+ifeq ($(CFG_PRINTF_V2), yes)
+C_FILES += $(FOC_DIR)/source/printf_v2.c
+C_FLAGS += -DCFG_PRINTF_V2
+else
 C_FILES += $(FOC_DIR)/source/printf.c
+endif
 LD_FLAGS += -Wl,--wrap,printf
 #C_FILES += $(FOC_DIR)/source/bldc/bldc_manager.c
 #C_FILES += $(FOC_DIR)/source/bldc/bldc_device.c
@@ -110,12 +119,6 @@ endif
 
 ifeq ($(CFG_FOC_TEST_SUPPORT),yes)
 C_FLAGS += -DCFG_FOC_TEST_SUPPORT
+#C_FILES += $(FOC_DIR)/test/test_task.c
 #C_FILES += $(FOC_DIR)/test/test_timer.c
-C_FILES += $(FOC_DIR)/test/test_bldc.c
-endif
-
-ifeq ($(CFG_FOC_TEST_TASK_SUPPORT),yes)
-C_FLAGS += -DCFG_FOC_TEST_TASK_SUPPORT
-#C_FILES += $(FOC_DIR)/test/test_timer.c
-C_FILES += $(FOC_DIR)/test/test_task.c
 endif

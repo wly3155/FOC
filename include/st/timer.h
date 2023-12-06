@@ -15,23 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cm4/scb.h"
-#include "st/st_board.h"
-#include "st/st_gpio.h"
-#include "st/st_reg.h"
-#include "st/time.h"
-#include "st/st_timer.h"
+#ifndef __ST_TIMER_H__
+#define __ST_TIMER_H__
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_conf.h"
+#include <stdbool.h>
+#include <stdint.h>
 
-void prvSetupHardware(void)
-{
-	/* Setup STM32 system (clock, PLL and Flash configuration) */
-	SystemInit();
-	/* Ensure all priority bits are assigned as preemption priority bits. */
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-	gpio_platform_init();
-	time_platform_init();
-	//timer_platform_init();
+#ifdef __cplusplus
+extern "c" {
+#endif
+
+struct timer_device {
+	int (*handler)(void *private_data);
+	void *private_data;
+};
+
+int timer_enable(struct timer_device *dev, bool enable);
+void timer_register(struct timer_device *dev, uint32_t period_ns);
+int timer_platform_init(void);
+
+#ifdef __cplusplus
 }
+#endif
+#endif
