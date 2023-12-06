@@ -16,10 +16,25 @@
 #ifndef __PRINTF_H__
 #define __PRINTF_H__
 
+#include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifdef CFG_PRINTF_V2
+void _putchar(char character);
+#define sprintf sprintf_
+int sprintf_(char* buffer, const char* format, ...);
+#define snprintf  snprintf_
+#define vsnprintf vsnprintf_
+int  snprintf_(char* buffer, size_t count, const char* format, ...);
+int vsnprintf_(char* buffer, size_t count, const char* format, va_list va);
+#define vprintf vprintf_
+int vprintf_(const char* format, va_list va);
+int fctprintf(void (*out)(char character, void* arg), void* arg, const char* format, ...);
 #endif
 
 #define PRINTF_SUPPORT

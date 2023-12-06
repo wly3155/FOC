@@ -14,7 +14,7 @@
 
 static uint32_t get_curr_systick_count(void)
 {
-    return REG32_READ(REG_SYST_CVR);
+    return reg_read32(REG_SYST_CVR);
 }
 
 uint64_t get_boot_time_ns(void)
