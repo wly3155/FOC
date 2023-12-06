@@ -7,16 +7,16 @@
 extern "c" {
 #endif
 
-#define REG32_READ(reg)                     (*((volatile uint32_t *)reg))
-#define REG32_WRITE(reg, value)             (*((volatile uint32_t *)reg) = value)
+#define max(x, y)			((x) > (y) ? (x) : (y))
+#define min(x, y)			((x) < (y) ? (x) : (y))
 
-#define min(x, y)                           (x < y ? x : y)
-#define tick_to_ms(tick)                    ((uint64_t)tick * configTICK_RATE_HZ / 1000)
+#define tick_to_ms(tick)		((uint64_t)tick * configTICK_RATE_HZ / 1000)
+#define ms_to_us(time)			((uint64_t)time * 1000)
+#define us_to_ns(time)			((uint64_t)time * 1000)
+#define ms_to_ns(time)			(us_to_ns(ms_to_us(time)))
 
-#define ms_to_ns(time)                      ((uint64_t)time * 1000000)
-#define ARRAY_SIZE(arr)                     (sizeof(arr) / sizeof(arr[0]))
-
-#define fatal(x)                            configASSERT(x)
+#define ARRAY_SIZE(arr)			(sizeof(arr) / sizeof(arr[0]))
+#define fatal(x)			configASSERT(x)
 
 #ifdef __cplusplus
 }
