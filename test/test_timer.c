@@ -1,44 +1,85 @@
+/*
+ * This file is licensed under the Apache License, Version 2.0.
+ *
+ * Copyright (c) 2023 wuliyong3155@163.com
+ *
+ * A copy of the license can be obtained at: http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 #include "FreeRTOS.h"
 #include "task.h"
-#include "timers.h"
-#include "semphr.h"
 
-#include "log.h"
-#include "st/st_timer.h"
+#include "printf.h"
+#include "st/timer_wrapper.h"
 
-static struct timer_device *timer_dev;
-static struct timer_device *input_capture_dev;
+#include "misc.h"
+#include "stm32f4xx_rcc.h"
+#include "stm32f4xx_tim.h"
+#ifdef CFG_SEGGER_RTT_SUPPORT
+#include "RTT/SEGGER_RTT.h"
+#endif
 
-static int test_timer_handler(void *private_data)
+void TIM_Config(void)
 {
-    static uint8_t count = 0;
-    logi("%s %u\n", __func__, count++);
-    return 0;
+  NVIC_InitTypeDef NVIC_InitStructure;
+  TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+  uint16_t PrescalerValue = 0;
+
+  /* TIM2 clock enable */
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+  /* Enable the TIM2 global Interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+  /* Compute the prescaler value */
+  PrescalerValue = (uint16_t) ((SystemCoreClock / 2) / 6000000) - 1;
+  /* Prescaler configuration */
+  TIM_PrescalerConfig(TIM2, PrescalerValue, TIM_PSCReloadMode_Immediate);
+
+  /* Time base configuration */
+  TIM_TimeBaseStructure.TIM_Period = 65530;
+  TIM_TimeBaseStructure.TIM_Prescaler = 0;
+  TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+
+  TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+  TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+
+  /* TIM2 enable counter */
+  TIM_Cmd(TIM2, ENABLE);
 }
 
-static void test_task(void *param)
+static void test_task_func(void *param)
 {
-    timer_dev = request_timer_device(TIMER2);
-    configASSERT(timer_dev);
-
-    timer_dev->freq_hz = 10;
-    timer_dev->irq_enable = true;
-    timer_dev->irq_request_type = TIM_IT_Update;
-    timer_dev->irq_handler = test_timer_handler;
-    timer_init(timer_dev);
-    timer_start(timer_dev);
-
-    input_capture_dev = request_timer_device(TIMER5);
-    configASSERT(input_capture_dev);
-
-    while (1) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
+	static uint8_t count = 0;
+	uint8_t task_id = (uint8_t)(uint32_t)param;
+    //extern uint32_t test_timer_irq;
+	//timer_wrapper_enable(true);
+	while (1) {
+		    pr_info("[%u] %s runs @%u\n", task_id, __func__, count++);
+            vTaskDelay(1000);
+	}
 }
 
-void test_init(void)
+void test_task_init(void)
 {
-#define config_TEST_TASK_STACK_SIZE 1024
+#define config_TEST_TASK_STACK_SIZE 512
 #define config_TEST_TASK_PRI (configMAX_PRIORITIES - 3)
-    xTaskCreate(test_task, "test", config_TEST_TASK_STACK_SIZE, ( void * ) NULL, config_TEST_TASK_PRI, NULL);
+	xTaskCreate(test_task_func, "test_task1", config_TEST_TASK_STACK_SIZE,
+		( void * ) 1, config_TEST_TASK_PRI, NULL);
+	xTaskCreate(test_task_func, "test_task2", config_TEST_TASK_STACK_SIZE,
+		( void * ) 2, config_TEST_TASK_PRI, NULL);
+	timer_wrapper_init(1000000000);
+	timer_wrapper_enable(true);
 }
