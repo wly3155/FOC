@@ -11,7 +11,7 @@ void prvSetupHardware(void)
     SystemInit();
 
     /* Ensure all priority bits are assigned as preemption priority bits. */
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
 
     gpio_platform_init();
     timer_platform_init();

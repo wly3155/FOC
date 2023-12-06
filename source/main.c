@@ -131,8 +131,8 @@ int main(void)
 #endif
 
 #ifdef CFG_FOC_TEST_SUPPORT
-    extern void test_init(void);
-    test_init();
+    extern void test_timer_init(void);
+    test_timer_init();
 #endif
 
     /* Start the scheduler. */
