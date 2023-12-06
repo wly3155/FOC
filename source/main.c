@@ -125,14 +125,9 @@ int main(void)
     led_init();
     //bldc_init();
 
-#ifdef CFG_FOC_TEST_TASK_SUPPORT
+#ifdef CFG_FOC_TEST_SUPPORT
     extern void test_task_init(void);
     test_task_init();
-#endif
-
-#ifdef CFG_FOC_TEST_SUPPORT
-    extern void test_init(void);
-    test_init();
 #endif
 
     /* Start the scheduler. */

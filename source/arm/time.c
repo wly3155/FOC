@@ -22,11 +22,7 @@ uint64_t get_boot_time_ns(void)
     TickType_t tick;
     uint32_t tick_count;
 
-    if (is_in_isr())
-        tick = xTaskGetTickCountFromISR();
-    else
-        tick = xTaskGetTickCount();
-
+    tick = xTaskGetTickCount();
     tick_count = get_curr_systick_count();
     return ms_to_ns(tick_to_ms(tick)) + tick_count * configSYSTICK_CLOCK_NS;
 }
