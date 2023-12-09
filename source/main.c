@@ -113,6 +113,8 @@
 #include "printf.h"
 #include "led.h"
 #include "bldc_init.h"
+
+#include "st/mpu.h"
 #include "st/st_board.h"
 
 int main(void)
@@ -120,6 +122,7 @@ int main(void)
     /* Configure the hardware ready to run the test. */
     prvSetupHardware();
     printf_init();
+    mpu_init();
     irq_init();
     pr_info("********foc start*********\n");
     led_init();
