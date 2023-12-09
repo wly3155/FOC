@@ -80,6 +80,7 @@ C_FLAGS += -DCFG_ST_BOARD_SUPPORT
 C_INCLUDES += -I$(FOC_DIR)/include
 C_FILES += $(FOC_DIR)/source/arm/time.c
 C_FILES += $(FOC_DIR)/source/st/adc_wrapper.c
+C_FILES += $(FOC_DIR)/source/st/mpu.c
 C_FILES += $(FOC_DIR)/source/st/flash_wrapper.c
 C_FILES += $(FOC_DIR)/source/st/st_board.c
 #C_FILES += $(FOC_DIR)/source/st/st_gpio.c

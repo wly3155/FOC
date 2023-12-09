@@ -116,14 +116,16 @@
 #include "st/st_board.h"
 
 #include "st/adc_wrapper.h"
+#include "st/mpu.h"
 #include "st/flash_wrapper.h"
 
 int main(void)
 {
 	/* Configure the hardware ready to run the test. */
 	prvSetupHardware();
-
 	printf_init();
+
+	mpu_init();
 	irq_init();
 	pr_info("********foc start*********\n");
 	//led_init();
