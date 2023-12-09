@@ -80,25 +80,21 @@ __weak void EXTI15_10_IRQHandler(void)
 
 void BusFault_Handler(void)
 {
-    loge("%s\n", __func__);
-    configASSERT(0);
+    while (1);
 }
 
 void UsageFault_Handler(void)
 {
-    loge("%s\n", __func__);
-    configASSERT(0);
+    while (1);
 }
 
 void DebugMon_Handler(void)
 {
-    loge("%s\n", __func__);
-    configASSERT(0);
+    while (1);
 }
 void NMI_Handler(void)
 {
-    loge("%s\n", __func__);
-    configASSERT(0);
+    while (1);
 }
 
 void pop_registers_from_fault_stack(unsigned int * hardfault_args)
@@ -129,24 +125,12 @@ void pop_registers_from_fault_stack(unsigned int * hardfault_args)
 
 void HardFault_Handler(void)
 {
-    asm volatile
-    (
-        " tst lr, #4                                                \n"
-        " ite eq                                                    \n"
-        " mrseq r0, msp                                             \n"
-        " mrsne r0, psp                                             \n"
-        " ldr r1, [r0, #24]                                         \n"
-        " ldr r2, handler2_address_const                            \n"
-        " bx r2                                                     \n"
-        " handler2_address_const: .word pop_registers_from_fault_stack    \n"
-    );
-    configASSERT(0);
+    while (1);
 }
 
 void MemManage_Handler(void)
 {
-    loge("%s\n", __func__);
-    configASSERT(0);
+    while (1);
 }
 
 void TIM2_IRQHandler(void)

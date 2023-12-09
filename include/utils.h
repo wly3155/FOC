@@ -7,7 +7,7 @@
 extern "c" {
 #endif
 
-#define REG32_READ(reg)                     (*((volatile uint32_t *)reg))
+#define REG32_READ(reg)                     (*((volatile const uint32_t *)reg))
 #define REG32_WRITE(reg, value)             (*((volatile uint32_t *)reg) = value)
 
 #define min(x, y)                           (x < y ? x : y)

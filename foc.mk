@@ -16,9 +16,8 @@ STM32_PERIPH_DIR=$(STM32_DIR)/STM32F4xx_DSP_StdPeriph_Lib_V1.9.0/Libraries/STM32
 STM32_TEMPLATES_DIR=$(STM32_DIR)/STM32F4xx_DSP_StdPeriph_Lib_V1.9.0/Project/STM32F4xx_StdPeriph_Templates
 
 FPU = -mfloat-abi=softfp -mfpu=fpv4-sp-d16
-MCU = -mcpu=cortex-m3 -mthumb $(FPU) $(FLOAT_ABI)
+MCU = -mcpu=cortex-m4 -mthumb $(FPU) $(FLOAT_ABI)
 C_FLAGS += $(MCU)
-C_FLAGS += -Wno-misleading-indentation
 LD_SCRIPT=$(STM32_TEMPLATES_DIR)/SW4STM32/STM32F40_41xxx/STM32F417IGHx_FLASH.ld
 
 C_INCLUDES += -I$(STM32_CMSIS_DIR)/Include
@@ -75,6 +74,9 @@ ifeq ($(CFG_ST_BOARD_SUPPORT),yes)
 C_FLAGS += -DCFG_ST_BOARD_SUPPORT
 C_INCLUDES += -I$(FOC_DIR)/include
 C_FILES += $(FOC_DIR)/source/arm/time.c
+ifdef ($(CFG_MPU_SUPPORT),yes)
+C_FILES += $(FOC_DIR)/source/st/mpu.c
+endif
 C_FILES += $(FOC_DIR)/source/st/st_board.c
 C_FILES += $(FOC_DIR)/source/st/st_gpio.c
 C_FILES += $(FOC_DIR)/source/st/st_timer.c

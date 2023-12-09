@@ -9,8 +9,8 @@ TARGET = $(PROJECT)
 # default action: build all
 all: $(OUTPUT_DIR)/$(TARGET).elf
 	$(_CROSS_COMPILER_OBJCOPY_) -O ihex $(OUTPUT_DIR)/$(TARGET).elf $(OUTPUT_DIR)/$(TARGET).hex
-	$(_CROSS_COMPILER_OBJCOPY_) -O binary $(OUTPUT_DIR)/$(TARGET).elf $(OUTPUT_DIR)/$(TARGET).bin
-	$(_CROSS_COMPILER_OBJDUMP_) -S -d $(OUTPUT_DIR)/$(TARGET).elf > $(OUTPUT_DIR)/$(TARGET).asm
+	$(_CROSS_COMPILER_OBJCOPY_) -O binary -S $(OUTPUT_DIR)/$(TARGET).elf $(OUTPUT_DIR)/$(TARGET).bin
+	$(_CROSS_COMPILER_OBJDUMP_) -S -s -d $(OUTPUT_DIR)/$(TARGET).elf > $(OUTPUT_DIR)/$(TARGET).asm
 	@echo "Sucessfuly build" $(PROJECT)
 
 #######################################
